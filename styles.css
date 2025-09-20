@@ -1,0 +1,93 @@
+/* Rehype GIF Controls Styles */
+
+.gif-controls-wrapper {
+  display: inline-block;
+  position: relative;
+  max-width: 100%;
+}
+
+.gif-controls-image {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.gif-controls-wrapper.gif-paused .gif-controls-image {
+  opacity: 0.7;
+}
+
+.gif-replay-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 24px;
+  transition: all 0.2s ease;
+  user-select: none;
+  z-index: 10;
+}
+
+.gif-replay-btn:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.gif-controls-wrapper[data-click-to-replay="true"] .gif-controls-image {
+  cursor: pointer;
+}
+
+.gif-controls-wrapper[data-click-to-replay="true"] .gif-controls-image:hover {
+  opacity: 0.9;
+}
+
+/* Loading state */
+.gif-controls-wrapper[data-show-loader="true"] .gif-controls-image {
+  min-height: 100px;
+  background: #f5f5f5 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 50 50"><path fill="%23999" d="M25 5A20 20 0 1 1 5 25a20 20 0 0 1 20-20m0-5A25 25 0 1 0 50 25A25 25 0 0 0 25 0Z" opacity=".4"/><path fill="%23999" d="M25 0A25 25 0 0 1 50 25h-5A20 20 0 0 0 25 5V0Z"><animateTransform attributeName="transform" dur="1s" repeatCount="indefinite" type="rotate" values="0 25 25;360 25 25"/></path></svg>') no-repeat center center;
+  background-size: 30px 30px;
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+  .gif-controls-wrapper {
+    width: 100%;
+  }
+
+  .gif-controls-image {
+    width: 100%;
+  }
+
+  .gif-replay-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .gif-replay-btn {
+    background: black;
+    border: 2px solid white;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .gif-replay-btn {
+    transition: none;
+  }
+
+  .gif-replay-btn:hover {
+    transform: translate(-50%, -50%);
+  }
+}
