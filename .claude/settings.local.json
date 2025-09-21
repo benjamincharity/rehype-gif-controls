@@ -15,7 +15,8 @@
       "Read(//private/tmp/**)",
       "Read(//tmp/gif-player/src/**)",
       "Bash(npm run lint)",
-      "Bash(npm run typecheck:*)"
+      "Bash(npm run typecheck:*)",
+      "Bash(npm run format:*)"
     ],
     "deny": [],
     "ask": []
