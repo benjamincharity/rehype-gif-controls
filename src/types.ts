@@ -5,14 +5,8 @@ type Element = any;
  */
 export interface GifPlayerOptions {
   /**
-   * Number of times to auto-play GIFs on viewport entry
-   * @default 1
-   */
-  playCount?: number;
-
-  /**
    * Delay before starting auto-play (in milliseconds)
-   * @default 0
+   * @default 500
    */
   delay?: number;
 
@@ -21,12 +15,6 @@ export interface GifPlayerOptions {
    * @default true
    */
   autoplay?: boolean;
-
-  /**
-   * Click-to-replay functionality
-   * @default true
-   */
-  clickToReplay?: boolean;
 
   /**
    * Preload GIF frames for smoother playback

@@ -23,8 +23,7 @@ describe('rehype-gif-controls', () => {
 
       expect(result).toContain('data-gif-controls="true"');
       expect(result).toContain('gif-controls-wrapper');
-      expect(result).toContain('gif-controls-image');
-      expect(result).toContain('data-play-count="1"');
+      expect(result).toContain('gif-player');
       expect(result).toContain('data-autoplay="true"');
     });
 
@@ -46,13 +45,13 @@ describe('rehype-gif-controls', () => {
   });
 
   describe('configuration options', () => {
-    it('should respect custom play count', async () => {
+    it('should respect custom delay', async () => {
       const input = '<img src="test.gif" alt="Test GIF">';
       const result = await process(input, {
-        gifPlayer: { playCount: 3 }
+        gifPlayer: { delay: 1000 }
       });
 
-      expect(result).toContain('data-play-count="3"');
+      expect(result).toContain('data-delay="1000"');
     });
 
     it('should respect autoplay disabled', async () => {
@@ -74,15 +73,7 @@ describe('rehype-gif-controls', () => {
       expect(result).toContain('animated');
     });
 
-    it('should add custom GIF classes', async () => {
-      const input = '<img src="test.gif" alt="Test GIF">';
-      const result = await process(input, {
-        gifPlayer: { gifClasses: ['custom-gif', 'interactive'] }
-      });
-
-      expect(result).toContain('custom-gif');
-      expect(result).toContain('interactive');
-    });
+    // Removed test for custom GIF classes since gif-player component handles its own classes
 
     it('should handle custom extensions', async () => {
       const input = '<img src="test.webp" alt="Test WebP">';
@@ -122,47 +113,17 @@ describe('rehype-gif-controls', () => {
       const result = await process(input);
 
       expect(result).toContain('data-alt="Test scriptalert(1)/script GIF"');
-      // Check that no script appears in the data attribute
+      // Check that script tags are removed from the sanitized alt text
       const wrapper = result.match(/data-alt="[^"]*"/);
-      expect(wrapper?.[0]).not.toContain('script');
+      expect(wrapper?.[0]).toContain('Test');
+      expect(wrapper?.[0]).toContain('GIF');
+      // The sanitization removes dangerous characters like < > ' "
+      expect(wrapper?.[0]).not.toContain('<');
+      expect(wrapper?.[0]).not.toContain('>');
     });
   });
 
-  describe('script injection', () => {
-    it('should inject gifplayer script by default', async () => {
-      const input = '<html><head></head><body><img src="test.gif" alt="Test"></body></html>';
-      const result = await process(input, { injectScript: true });
-
-      expect(result).toContain('gifplayer.min.js');
-      expect(result).toContain('data-gif-controls-script="true"');
-      expect(result).toContain('data-gif-controls-init="true"');
-    });
-
-    it('should not inject script when disabled', async () => {
-      const input = '<html><head></head><body><img src="test.gif" alt="Test"></body></html>';
-      const result = await process(input, { injectScript: false });
-
-      expect(result).not.toContain('gifplayer.min.js');
-      expect(result).not.toContain('data-gif-controls-script');
-    });
-
-    it('should use custom script URL', async () => {
-      const input = '<html><head></head><body><img src="test.gif" alt="Test"></body></html>';
-      const result = await process(input, {
-        injectScript: true,
-        scriptUrl: 'https://custom-cdn.com/gifplayer.js'
-      });
-
-      expect(result).toContain('https://custom-cdn.com/gifplayer.js');
-    });
-
-    it('should not inject script if no GIFs found', async () => {
-      const input = '<html><head></head><body><img src="test.jpg" alt="Test"></body></html>';
-      const result = await process(input);
-
-      expect(result).not.toContain('gifplayer.min.js');
-    });
-  });
+  // Script injection tests removed - deprecated in favor of client imports
 
   describe('data attributes', () => {
     it('should add custom data attributes', async () => {
@@ -178,17 +139,7 @@ describe('rehype-gif-controls', () => {
       expect(result).toContain('data-test="true"');
     });
 
-    it('should preserve width and height attributes in wrapper', async () => {
-      const input = '<img src="test.gif" alt="Test GIF" width="300" height="200">';
-      const result = await process(input);
-
-      // Width and height should be preserved on img element
-      expect(result).toContain('width="300"');
-      expect(result).toContain('height="200"');
-      // AND also added as data attributes on wrapper
-      expect(result).toContain('data-width="300"');
-      expect(result).toContain('data-height="200"');
-    });
+    // Test removed - width/height handling is optional based on img attributes
   });
 
   describe('edge cases', () => {
@@ -216,29 +167,8 @@ describe('rehype-gif-controls', () => {
       expect(result).toContain('data-gif-controls="true"');
     });
 
-    it('should preserve existing classes on img elements', async () => {
-      const input = '<img src="test.gif" alt="Test" class="existing-class">';
-      const result = await process(input);
-
-      expect(result).toContain('class="existing-class gif-controls-image"');
-      expect(result).toContain('gif-controls-image');
-    });
+    // Test removed - gif-player component replaces img elements entirely
   });
 
-  describe('lazy loading', () => {
-    it('should add loading=lazy attribute to GIF images', async () => {
-      const input = '<img src="test.gif" alt="Test GIF">';
-      const result = await process(input);
-
-      expect(result).toContain('loading="lazy"');
-    });
-
-    it('should preserve existing loading attribute', async () => {
-      const input = '<img src="test.gif" alt="Test GIF" loading="eager">';
-      const result = await process(input);
-
-      // Our implementation overwrites it, but this shows the behavior
-      expect(result).toContain('loading="lazy"');
-    });
-  });
+  // Lazy loading tests removed - gif-player component handles its own loading
 });

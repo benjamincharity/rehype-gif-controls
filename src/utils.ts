@@ -7,10 +7,8 @@ type Element = any;
  */
 export const defaultOptions: Required<RehypeGifControlsOptions> = {
   gifPlayer: {
-    playCount: 1,
     delay: 500,
     autoplay: true,
-    clickToReplay: true,
     preload: true,
     showLoader: true,
     wrapperClasses: [],
@@ -153,6 +151,7 @@ export function createGifWrapper(
       play: '', // Initially not playing, will be controlled by our script
       size: 'auto',
       class: 'gif-controls-player',
+      repeat: '', // Enable infinite repeat
     },
     children: [],
   };
@@ -163,10 +162,8 @@ export function createGifWrapper(
     properties: {
       class: wrapperClasses,
       'data-gif-controls': 'true',
-      'data-play-count': String(gifPlayer.playCount),
       'data-delay': String(gifPlayer.delay),
       'data-autoplay': String(gifPlayer.autoplay),
-      'data-click-to-replay': String(gifPlayer.clickToReplay),
       'data-preload': String(gifPlayer.preload),
       'data-show-loader': String(gifPlayer.showLoader),
       style: 'display: inline-block; position: relative;',
@@ -177,13 +174,13 @@ export function createGifWrapper(
 
   // Add width/height if available
   if (gifElement.width) {
-    wrapper.properties!['data-width'] = gifElement.width;
-    gifPlayerElement.properties!.style = 'width: ' + gifElement.width + 'px;';
+    setAttributeValue(wrapper, 'data-width', gifElement.width);
+    gifPlayerElement.properties!.style = `width: ${gifElement.width}px;`;
   }
   if (gifElement.height) {
-    wrapper.properties!['data-height'] = gifElement.height;
+    setAttributeValue(wrapper, 'data-height', gifElement.height);
     const existingStyle = gifPlayerElement.properties!.style || '';
-    gifPlayerElement.properties!.style = existingStyle + ' height: ' + gifElement.height + 'px;';
+    gifPlayerElement.properties!.style = `${existingStyle} height: ${gifElement.height}px;`;
   }
 
   // Sanitize alt text for data attribute

@@ -5,9 +5,6 @@
 
 import gifPlayerInit from 'gif-player';
 
-type PlayCountTracker = Map<string, number>;
-
-let playCountTracker: PlayCountTracker = new Map();
 let isInitialized = false;
 
 /**
@@ -38,76 +35,24 @@ export function initGifControls(): void {
     console.log('🎯 GIF Controls: Initializing GIF Player for:', gifPlayerElement.src);
     wrapper.setAttribute('data-initialized', 'true');
 
-    const playCount = parseInt(wrapperElement.dataset['playCount'] || '1', 10);
-    const delay = parseInt(wrapperElement.dataset['delay'] || '0', 10);
-    const autoplay = wrapperElement.dataset['autoplay'] === 'true';
-    const clickToReplay = wrapperElement.dataset['clickToReplay'] === 'true';
-
-    console.log('⚙️ GIF Controls: Settings -', { playCount, delay, autoplay, clickToReplay });
-
-    const trackingId = gifPlayerElement.src || Math.random().toString();
-    let currentPlayCount = playCountTracker.get(trackingId) || 0;
-    let isPlaying = false;
-
-    function startPlaybackCycle() {
-      if (isPlaying) return; // Prevent multiple simultaneous cycles
-
-      currentPlayCount++;
-      playCountTracker.set(trackingId, currentPlayCount);
-      console.log('🎞️ GIF Controls: Play count incremented to', currentPlayCount);
-
-      isPlaying = true;
-      gifPlayerElement.play = true;
-
-      // Listen for animation completion
-      const handleFrame = function(event: CustomEvent) {
-        // When we return to frame 0, the animation has completed one cycle
-        if (event.detail === 0 && currentPlayCount > 0) {
-          console.log('⏱️ GIF Controls: Animation cycle completed');
-
-          if (currentPlayCount >= playCount) {
-            console.log('⏸️ GIF Controls: Play count limit reached, pausing');
-            gifPlayerElement.play = false;
-            gifPlayerElement.frame = 0; // Show first frame
-            isPlaying = false;
-            showReplayButton();
-          } else {
-            console.log('🔄 GIF Controls: Starting next play cycle');
-            // Continue to next cycle
-            isPlaying = false;
-            setTimeout(() => startPlaybackCycle(), 50); // Small delay between cycles
-          }
-
-          gifPlayerElement.removeEventListener('gif-frame', handleFrame);
-        }
-      };
-
-      gifPlayerElement.addEventListener('gif-frame', handleFrame);
+    // Ensure wrapper has position relative for absolute positioned children
+    if (getComputedStyle(wrapperElement).position === 'static') {
+      wrapperElement.style.position = 'relative';
     }
 
-    function showReplayButton() {
-      if (!wrapper.querySelector('.gif-replay-btn')) {
-        const replayBtn = document.createElement('button');
-        replayBtn.className = 'gif-replay-btn';
-        replayBtn.innerHTML = '▶️ Replay';
-        replayBtn.style.cssText = 'position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 14px; z-index: 10;';
-        wrapperElement.appendChild(replayBtn);
+    const delay = parseInt(wrapperElement.dataset['delay'] || '0', 10);
+    const autoplay = wrapperElement.dataset['autoplay'] === 'true';
 
-        replayBtn.addEventListener('click', function() {
-          console.log('🔄 GIF Controls: Replay button clicked');
-          // Reset play count and restart
-          currentPlayCount = 0;
-          playCountTracker.set(trackingId, 0);
-          isPlaying = false;
-          replayBtn.remove();
+    console.log('⚙️ GIF Controls: Settings -', { delay, autoplay });
 
-          if (delay > 0) {
-            setTimeout(() => startPlaybackCycle(), delay);
-          } else {
-            startPlaybackCycle();
-          }
-        });
-      }
+    // Start with gif-player ready to play immediately
+    gifPlayerElement.style.display = 'block';
+    gifPlayerElement.style.visibility = 'visible';
+    gifPlayerElement.setAttribute('repeat', ''); // Enable infinite loop
+
+    function startPlayback() {
+      console.log('🎬 GIF Controls: Starting GIF playback with infinite loop');
+      gifPlayerElement.play = true;
     }
 
     // Set up viewport detection for autoplay
@@ -119,36 +64,18 @@ export function initGifControls(): void {
             observer.unobserve(wrapper as Element);
 
             if (delay > 0) {
-              setTimeout(() => startPlaybackCycle(), delay);
+              setTimeout(() => startPlayback(), delay);
             } else {
-              startPlaybackCycle();
+              startPlayback();
             }
           }
         });
       }, { threshold: 0.1 });
 
       observer.observe(wrapper as Element);
-    }
-
-    // Click to replay functionality
-    if (clickToReplay) {
-      wrapperElement.style.cursor = 'pointer';
-      wrapperElement.addEventListener('click', function(e) {
-        const target = e.target as HTMLElement;
-        if (target.classList.contains('gif-replay-btn')) return;
-        if (target.tagName.toLowerCase() === 'gif-player') return; // Don't interfere with gif-player controls
-
-        console.log('👆 GIF Controls: Click to replay triggered');
-        // Reset and replay
-        currentPlayCount = 0;
-        playCountTracker.set(trackingId, 0);
-        isPlaying = false;
-
-        const existingBtn = wrapper.querySelector('.gif-replay-btn');
-        if (existingBtn) existingBtn.remove();
-
-        startPlaybackCycle();
-      });
+    } else {
+      // If not autoplay, start immediately
+      startPlayback();
     }
   });
 }
@@ -171,5 +98,4 @@ if (typeof window !== 'undefined') {
 /**
  * Export for manual initialization
  */
-export { playCountTracker };
-export default { initGifControls, playCountTracker };
+export default { initGifControls };

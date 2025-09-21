@@ -12,42 +12,6 @@
   display: block;
 }
 
-.gif-controls-wrapper.gif-paused .gif-controls-image {
-  opacity: 0.7;
-}
-
-.gif-replay-btn {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 24px;
-  transition: all 0.2s ease;
-  user-select: none;
-  z-index: 10;
-}
-
-.gif-replay-btn:hover {
-  background: rgba(0, 0, 0, 0.9);
-  transform: translate(-50%, -50%) scale(1.1);
-}
-
-.gif-controls-wrapper[data-click-to-replay="true"] .gif-controls-image {
-  cursor: pointer;
-}
-
-.gif-controls-wrapper[data-click-to-replay="true"] .gif-controls-image:hover {
-  opacity: 0.9;
-}
 
 /* Loading state */
 .gif-controls-wrapper[data-show-loader="true"] .gif-controls-image {
@@ -66,28 +30,9 @@
     width: 100%;
   }
 
-  .gif-replay-btn {
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-  }
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  .gif-replay-btn {
-    background: black;
-    border: 2px solid white;
-  }
 }
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .gif-replay-btn {
-    transition: none;
-  }
-
-  .gif-replay-btn:hover {
-    transform: translate(-50%, -50%);
-  }
+  /* GIF animations respect user preference via gif-player component */
 }
