@@ -52,7 +52,11 @@ export function isGifImage(element: Element, extensions: string[]): boolean {
 
   // Extract file extension from URL or data URI
   const extension = extractFileExtension(src);
-  return extension !== null && extensions.includes(extension.toLowerCase());
+  return (
+    extension !== null &&
+    extension !== undefined &&
+    extensions.includes(extension.toLowerCase())
+  );
 }
 
 /**
@@ -63,7 +67,7 @@ function extractFileExtension(src: string): string | undefined {
   if (src.startsWith('data:')) {
     // Use simple string operations instead of regex to prevent ReDoS
     const mimeStart = src.indexOf('image/');
-    if (mimeStart === -1) return null;
+    if (mimeStart === -1) return undefined;
 
     const mimeType = src.slice(Math.max(0, mimeStart + 6));
     const semicolon = mimeType.indexOf(';');
@@ -75,7 +79,7 @@ function extractFileExtension(src: string): string | undefined {
     );
 
     return end === Number.POSITIVE_INFINITY
-      ? null
+      ? undefined
       : mimeType.slice(0, Math.max(0, end));
   }
 
@@ -86,25 +90,25 @@ function extractFileExtension(src: string): string | undefined {
     const cleanUrl = urlWithoutQuery ? urlWithoutQuery.split('#')[0] : '';
 
     if (!cleanUrl) {
-      return null;
+      return undefined;
     }
 
     const lastDot = cleanUrl.lastIndexOf('.');
 
     if (lastDot === -1 || lastDot === cleanUrl.length - 1) {
-      return null;
+      return undefined;
     }
 
     const extension = cleanUrl.slice(Math.max(0, lastDot + 1)).toLowerCase();
 
     // Validate extension is alphanumeric only (security check)
     if (!/^[a-z\d]+$/i.test(extension)) {
-      return null;
+      return undefined;
     }
 
     return extension;
   } catch {
-    return null;
+    return undefined;
   }
 }
 
@@ -141,20 +145,13 @@ export function setAttributeValue(
  * Sanitize attribute values for security
  */
 export function sanitizeAttribute(value: string): string {
+  // Single-pass sanitization for better performance
   // Remove all HTML tags and dangerous patterns
   const sanitized = value
-    // Remove HTML/XML tags
-    .replaceAll(/<[^>]*>/g, '')
-    // Remove HTML entities that could become dangerous
-    .replaceAll(/&[#\w]+;/g, '')
-    // Remove javascript: protocol
-    .replaceAll(/javascript:/gi, '')
-    // Remove data: URIs with HTML content
-    .replaceAll(/data:text\/html[^,]*,/gi, '')
-    // Remove event handlers
-    .replaceAll(/on\w+\s*=/gi, '')
-    // Remove dangerous characters
-    .replaceAll(/[<>'"\\]/g, '')
+    .replaceAll(
+      /<[^>]*>|&[#\w]+;|javascript:|data:text\/html[^,]*,|on\w+\s*=|[<>'"\\]/gi,
+      ''
+    )
     .trim()
     .slice(0, 500);
 
@@ -182,9 +179,15 @@ export function validateGifSource(
     const url = new URL(src);
     const domain = url.hostname;
 
-    return allowedDomains.some(
-      (allowed) => domain === allowed || domain.endsWith('.' + allowed)
-    );
+    return allowedDomains.some((allowed) => {
+      // Exact match or proper subdomain match
+      return (
+        domain === allowed ||
+        (allowed.startsWith('.') && domain.endsWith(allowed)) ||
+        (!allowed.startsWith('.') && domain === allowed) ||
+        (!allowed.startsWith('.') && domain.endsWith('.' + allowed))
+      );
+    });
   } catch {
     // For relative URLs, allow them if no domain restrictions or if they're just filenames
     return true;
@@ -251,12 +254,17 @@ export function createGifWrapper(
 
   // Calculate and store aspect ratio if dimensions are available
   if (gifElement.width && gifElement.height) {
-    const aspectRatio = (
-      (Number.parseInt(gifElement.height, 10) /
-        Number.parseInt(gifElement.width, 10)) *
-      100
-    ).toFixed(2);
-    setAttributeValue(wrapper, 'data-gif-controls-aspect-ratio', aspectRatio);
+    const width = Number.parseInt(gifElement.width, 10);
+    const height = Number.parseInt(gifElement.height, 10);
+    if (
+      width > 0 &&
+      height > 0 &&
+      !Number.isNaN(width) &&
+      !Number.isNaN(height)
+    ) {
+      const aspectRatio = ((height / width) * 100).toFixed(2);
+      setAttributeValue(wrapper, 'data-gif-controls-aspect-ratio', aspectRatio);
+    }
   }
 
   // Sanitize alt text for data attribute

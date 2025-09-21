@@ -7,6 +7,7 @@
 import gifPlayerInit from './gif-player/index.js';
 
 let isInitialized = false;
+let initTimeout: ReturnType<typeof setTimeout> | undefined;
 
 /**
  * Initialize GIF controls for all GIFs on the page using gif-player
@@ -14,71 +15,83 @@ let isInitialized = false;
 export function initGifControls(): void {
   if (typeof window === 'undefined') return;
 
-  if (!isInitialized) {
-    // Initialize gif-player web component
-    gifPlayerInit();
-    isInitialized = true;
+  // Debounce initialization for performance
+  if (initTimeout) {
+    clearTimeout(initTimeout);
   }
 
-  const gifElements = document.querySelectorAll(
-    '[data-gif-controls="true"]:not([data-initialized])'
-  );
-
-  gifElements.forEach(function (wrapper: Element) {
-    const wrapperElement = wrapper as HTMLElement;
-    const gifPlayerElement = wrapper.querySelector('gif-player'); // Gif-player doesn't have TypeScript definitions
-
-    if (!gifPlayerElement) {
-      return;
+  initTimeout = setTimeout(() => {
+    if (!isInitialized) {
+      // Initialize gif-player web component
+      gifPlayerInit();
+      isInitialized = true;
     }
 
-    wrapper.dataset.initialized = 'true';
-
-    const delay = Number.parseInt(
-      wrapperElement.dataset.gifControlsDelay || '0',
-      10
+    const gifElements = document.querySelectorAll(
+      '[data-gif-controls="true"]:not([data-initialized])'
     );
-    const autoplay = wrapperElement.dataset.gifControlsAutoplay === 'true';
 
-    // Enable infinite loop
-    gifPlayerElement.setAttribute('repeat', '');
+    gifElements.forEach(function (wrapper: Element) {
+      const wrapperElement = wrapper as HTMLElement;
+      // eslint-disable-next-line @typescript-eslint/non-nullable-type-assertion-style
+      const gifPlayerElement = wrapper.querySelector(
+        'gif-player'
+      ) as HTMLElement & { play: boolean };
 
-    function startPlayback() {
-      gifPlayerElement.play = true;
-    }
+      if (!gifPlayerElement) {
+        return;
+      }
 
-    // Set up viewport detection for autoplay
-    if (autoplay) {
-      const observer = new IntersectionObserver(
-        function (entries) {
-          for (const entry of entries) {
-            if (entry.isIntersecting && entry.target === wrapper) {
-              observer.unobserve(wrapper);
+      wrapperElement.dataset['initialized'] = 'true';
 
-              if (delay > 0) {
-                setTimeout(() => {
+      const delay = Number.parseInt(
+        wrapperElement.dataset['gifControlsDelay'] || '0',
+        10
+      );
+      const autoplay = wrapperElement.dataset['gifControlsAutoplay'] === 'true';
+
+      // Enable infinite loop
+      gifPlayerElement.setAttribute('repeat', '');
+
+      function startPlayback() {
+        gifPlayerElement.setAttribute('play', '');
+      }
+
+      // Set up viewport detection for autoplay
+      if (autoplay) {
+        const observer = new IntersectionObserver(
+          function (entries) {
+            for (const entry of entries) {
+              if (entry.isIntersecting && entry.target === wrapper) {
+                observer.unobserve(wrapper);
+
+                if (delay > 0) {
+                  setTimeout(() => {
+                    startPlayback();
+                  }, delay);
+                } else {
                   startPlayback();
-                }, delay);
-              } else {
-                startPlayback();
+                }
               }
             }
-          }
-        },
-        { threshold: 0.1 }
-      );
+          },
+          { threshold: 0.1 }
+        );
 
-      observer.observe(wrapper);
-    } else {
-      // If not autoplay, start immediately
-      startPlayback();
-    }
-  });
+        observer.observe(wrapper);
+      } else {
+        // If not autoplay, start immediately
+        startPlayback();
+      }
+    });
+  }, 10); // 10ms debounce
 }
 
 /**
  * Auto-initialize when DOM is ready
  */
+let mutationObserver: MutationObserver | undefined;
+
 if (typeof window !== 'undefined') {
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initGifControls);
@@ -87,11 +100,23 @@ if (typeof window !== 'undefined') {
   }
 
   // Re-initialize for dynamically added content
-  const observer = new MutationObserver(initGifControls);
-  observer.observe(document.body, { childList: true, subtree: true });
+  mutationObserver = new MutationObserver(initGifControls);
+  mutationObserver.observe(document.body, { childList: true, subtree: true });
+
+  // Clean up on page unload
+  window.addEventListener('beforeunload', () => {
+    if (mutationObserver) {
+      mutationObserver.disconnect();
+    }
+
+    if (initTimeout) {
+      clearTimeout(initTimeout);
+    }
+  });
 }
 
 /**
  * Export for manual initialization
  */
+
 export default { initGifControls };
