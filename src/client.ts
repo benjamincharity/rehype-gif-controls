@@ -3,7 +3,8 @@
  * Import this in your application's main JS/TS file for proper dependency management
  */
 
-import gifPlayerInit from 'gif-player';
+// @ts-expect-error - Local JS module without full TypeScript definitions
+import gifPlayerInit from './gif-player/index.js';
 
 let isInitialized = false;
 
@@ -16,42 +17,27 @@ export function initGifControls(): void {
   if (!isInitialized) {
     // Initialize gif-player web component
     gifPlayerInit();
-    console.log('🎬 GIF Controls: gif-player web component initialized');
     isInitialized = true;
   }
 
   const gifElements = document.querySelectorAll('[data-gif-controls="true"]:not([data-initialized])');
-  console.log('🔍 GIF Controls: Found', gifElements.length, 'GIF elements to initialize');
 
   gifElements.forEach(function(wrapper: Element) {
     const wrapperElement = wrapper as HTMLElement;
     const gifPlayerElement = wrapper.querySelector('gif-player') as any; // gif-player doesn't have TypeScript definitions
 
     if (!gifPlayerElement) {
-      console.warn('❌ GIF Controls: No gif-player element found in wrapper');
       return;
     }
-
-    console.log('🎯 GIF Controls: Initializing GIF Player for:', gifPlayerElement.src);
     wrapper.setAttribute('data-initialized', 'true');
 
-    // Ensure wrapper has position relative for absolute positioned children
-    if (getComputedStyle(wrapperElement).position === 'static') {
-      wrapperElement.style.position = 'relative';
-    }
+    const delay = parseInt(wrapperElement.getAttribute('data-gif-controls-delay') || '0', 10);
+    const autoplay = wrapperElement.getAttribute('data-gif-controls-autoplay') === 'true';
 
-    const delay = parseInt(wrapperElement.dataset['delay'] || '0', 10);
-    const autoplay = wrapperElement.dataset['autoplay'] === 'true';
-
-    console.log('⚙️ GIF Controls: Settings -', { delay, autoplay });
-
-    // Start with gif-player ready to play immediately
-    gifPlayerElement.style.display = 'block';
-    gifPlayerElement.style.visibility = 'visible';
-    gifPlayerElement.setAttribute('repeat', ''); // Enable infinite loop
+    // Enable infinite loop
+    gifPlayerElement.setAttribute('repeat', '');
 
     function startPlayback() {
-      console.log('🎬 GIF Controls: Starting GIF playback with infinite loop');
       gifPlayerElement.play = true;
     }
 
@@ -60,7 +46,6 @@ export function initGifControls(): void {
       const observer = new IntersectionObserver(function(entries) {
         entries.forEach(function(entry) {
           if (entry.isIntersecting && entry.target === wrapper) {
-            console.log('📺 GIF Controls: GIF entered viewport - starting playback');
             observer.unobserve(wrapper as Element);
 
             if (delay > 0) {

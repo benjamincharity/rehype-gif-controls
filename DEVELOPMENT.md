@@ -38,13 +38,13 @@ const withMDX = require('@next/mdx')({
     rehypePlugins: [
       ['@benjc/rehype-gif-controls', {
         gifPlayer: {
-          playCount: 2,
-          clickToReplay: true,
+          delay: 500,
           autoplay: true,
         },
         security: {
           allowedDomains: [], // Empty = allow all domains
         },
+        // injectScript: true is the default - no need to specify
       }],
     ],
   },
@@ -54,6 +54,8 @@ module.exports = withMDX({
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
 });
 ```
+
+That's it! No manual script imports needed - the client script is automatically injected.
 
 ### For Astro
 
@@ -69,8 +71,8 @@ export default defineConfig({
       rehypePlugins: [
         [rehypeGifControls, {
           gifPlayer: {
-            playCount: 1,
-            clickToReplay: true,
+            delay: 500,
+            autoplay: true,
           },
         }],
       ],
@@ -91,8 +93,8 @@ module.exports = {
         rehypePlugins: [
           [require('@benjc/rehype-gif-controls'), {
             gifPlayer: {
-              playCount: 3,
               delay: 500,
+              autoplay: true,
             },
           }],
         ],
@@ -122,22 +124,23 @@ Here are some test GIFs:
 
 ### 2. Expected Behavior
 
-- **GIF images** should be wrapped in containers with `gif-controls-wrapper` class
+- **GIF images** should be wrapped in containers with `gif-controls` class and `data-gif-controls="true"`
 - **Non-GIF images** (like the PNG) should remain unchanged
-- **Scripts** should be automatically injected into the page
+- **Scripts** should be automatically injected into the page with `data-gif-controls-script="true"`
 - **Console** should show no errors related to the plugin
+- **Auto-play** should work when GIFs enter the viewport
 
 ### 3. Inspect the HTML Output
 
 Look for this structure in your browser dev tools:
 
 ```html
-<div class="gif-controls-wrapper" data-gif-controls="true" data-play-count="2" data-autoplay="true">
-  <img src="animation.gif" class="gif-controls-image" loading="lazy" alt="Loading Animation">
+<div class="gif-controls" data-gif-controls="true" data-gif-controls-delay="500" data-gif-controls-autoplay="true">
+  <gif-player src="animation.gif" class="gif-controls__player" repeat alt="Loading Animation">
+  </gif-player>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/gifplayer@0.3.3/dist/gifplayer.min.js" async defer></script>
-<script>/* Initialization code */</script>
+<script type="module" data-gif-controls-script="true" src="./lib/client.js"></script>
 ```
 
 ## Development Workflow
@@ -220,10 +223,10 @@ declare module '@benjc/rehype-gif-controls' {
 rehypeGifControls // Uses all defaults
 ```
 
-### Custom Play Count
+### Custom Delay
 ```javascript
 [rehypeGifControls, {
-  gifPlayer: { playCount: 3 }
+  gifPlayer: { delay: 1000 }
 }]
 ```
 
@@ -236,10 +239,10 @@ rehypeGifControls // Uses all defaults
 }]
 ```
 
-### No Script Injection
+### Manual Script Control
 ```javascript
 [rehypeGifControls, {
-  injectScript: false // Handle gifplayer.js yourself
+  injectScript: false // Disable auto-injection, handle script manually
 }]
 ```
 

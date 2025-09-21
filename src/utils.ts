@@ -1,6 +1,5 @@
+import type { Element } from 'hast';
 import type { ProcessedGifElement, RehypeGifControlsOptions } from './types.js';
-
-type Element = any;
 
 /**
  * Default plugin options
@@ -16,8 +15,7 @@ export const defaultOptions: Required<RehypeGifControlsOptions> = {
   },
   selector: 'img[src*=".gif"]',
   extensions: ['gif'],
-  injectScript: false, // Deprecated - use client import instead
-  scriptUrl: '', // Deprecated - use client import instead
+  injectScript: true, // Default to true for standard rehype plugin behavior
   dataAttributes: {},
   security: {
     allowedDomains: [],
@@ -61,13 +59,49 @@ export function isGifImage(element: Element, extensions: string[]): boolean {
 function extractFileExtension(src: string): string | null {
   // Handle data URIs
   if (src.startsWith('data:')) {
-    const match = src.match(/^data:image\/([^;]+)/);
-    return match?.[1] ?? null;
+    // Use simple string operations instead of regex to prevent ReDoS
+    const mimeStart = src.indexOf('image/');
+    if (mimeStart === -1) return null;
+
+    const mimeType = src.substring(mimeStart + 6);
+    const semicolon = mimeType.indexOf(';');
+    const comma = mimeType.indexOf(',');
+
+    const end = Math.min(
+      semicolon > -1 ? semicolon : Infinity,
+      comma > -1 ? comma : Infinity
+    );
+
+    return end !== Infinity ? mimeType.substring(0, end) : null;
   }
 
-  // Handle regular URLs
-  const match = src.match(/\.([a-z0-9]+)(?:[?#]|$)/i);
-  return match?.[1] ?? null;
+  // Handle regular URLs using safe string operations
+  try {
+    // Remove query and hash first
+    const urlWithoutQuery = src.split('?')[0];
+    const cleanUrl = urlWithoutQuery ? urlWithoutQuery.split('#')[0] : '';
+
+    if (!cleanUrl) {
+      return null;
+    }
+
+    const lastDot = cleanUrl.lastIndexOf('.');
+
+    if (lastDot === -1 || lastDot === cleanUrl.length - 1) {
+      return null;
+    }
+
+    const extension = cleanUrl.substring(lastDot + 1).toLowerCase();
+
+    // Validate extension is alphanumeric only (security check)
+    if (!/^[a-z0-9]+$/i.test(extension)) {
+      return null;
+    }
+
+    return extension;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -95,10 +129,24 @@ export function setAttributeValue(element: Element, name: string, value: string)
  * Sanitize attribute values for security
  */
 export function sanitizeAttribute(value: string): string {
-  return value
-    .replace(/[<>'\"]/g, '') // Remove potentially dangerous characters
+  // Remove all HTML tags and dangerous patterns
+  let sanitized = value
+    // Remove HTML/XML tags
+    .replace(/<[^>]*>/g, '')
+    // Remove HTML entities that could become dangerous
+    .replace(/&[#\w]+;/g, '')
+    // Remove javascript: protocol
+    .replace(/javascript:/gi, '')
+    // Remove data: URIs with HTML content
+    .replace(/data:text\/html[^,]*,/gi, '')
+    // Remove event handlers
+    .replace(/on\w+\s*=/gi, '')
+    // Remove dangerous characters
+    .replace(/[<>'\"\\]/g, '')
     .trim()
-    .slice(0, 500); // Limit length
+    .slice(0, 500);
+
+  return sanitized;
 }
 
 /**
@@ -138,20 +186,23 @@ export function createGifWrapper(
   const { gifPlayer, dataAttributes, security } = options;
 
   const wrapperClasses = [
-    'gif-controls-wrapper',
+    'gif-controls',
     ...(gifPlayer.wrapperClasses || []),
   ].join(' ');
+
+  // Sanitize the src attribute for security
+  const sanitizedSrc = security.sanitizeAttributes ? sanitizeAttribute(gifElement.src) : gifElement.src;
 
   // Create the gif-player web component
   const gifPlayerElement: Element = {
     type: 'element',
     tagName: 'gif-player',
     properties: {
-      src: gifElement.src,
+      src: sanitizedSrc,
       play: '', // Initially not playing, will be controlled by our script
-      size: 'auto',
-      class: 'gif-controls-player',
+      class: 'gif-controls__player',
       repeat: '', // Enable infinite repeat
+      // Note: Don't set size attribute - let CSS handle it
     },
     children: [],
   };
@@ -162,32 +213,35 @@ export function createGifWrapper(
     properties: {
       class: wrapperClasses,
       'data-gif-controls': 'true',
-      'data-delay': String(gifPlayer.delay),
-      'data-autoplay': String(gifPlayer.autoplay),
-      'data-preload': String(gifPlayer.preload),
-      'data-show-loader': String(gifPlayer.showLoader),
-      style: 'display: inline-block; position: relative;',
+      'data-gif-controls-delay': String(gifPlayer.delay),
+      'data-gif-controls-autoplay': String(gifPlayer.autoplay),
+      'data-gif-controls-preload': String(gifPlayer.preload),
+      'data-gif-controls-show-loader': String(gifPlayer.showLoader),
       ...dataAttributes,
     },
     children: [gifPlayerElement],
   };
 
-  // Add width/height if available
+  // Add width/height as data attributes for reference
+  // Don't set them on gif-player to keep it responsive
   if (gifElement.width) {
-    setAttributeValue(wrapper, 'data-width', gifElement.width);
-    gifPlayerElement.properties!.style = `width: ${gifElement.width}px;`;
+    setAttributeValue(wrapper, 'data-gif-controls-width', gifElement.width);
   }
   if (gifElement.height) {
-    setAttributeValue(wrapper, 'data-height', gifElement.height);
-    const existingStyle = gifPlayerElement.properties!.style || '';
-    gifPlayerElement.properties!.style = `${existingStyle} height: ${gifElement.height}px;`;
+    setAttributeValue(wrapper, 'data-gif-controls-height', gifElement.height);
+  }
+
+  // Calculate and store aspect ratio if dimensions are available
+  if (gifElement.width && gifElement.height) {
+    const aspectRatio = (parseInt(gifElement.height) / parseInt(gifElement.width) * 100).toFixed(2);
+    setAttributeValue(wrapper, 'data-gif-controls-aspect-ratio', aspectRatio);
   }
 
   // Sanitize alt text for data attribute
   if (gifElement.alt && security.sanitizeAttributes) {
     const sanitizedAlt = sanitizeAttribute(gifElement.alt);
-    setAttributeValue(wrapper, 'data-alt', sanitizedAlt);
-    gifPlayerElement.properties!.alt = sanitizedAlt;
+    setAttributeValue(wrapper, 'data-gif-controls-alt', sanitizedAlt);
+    gifPlayerElement.properties!['alt'] = sanitizedAlt;
   }
 
   return wrapper;
@@ -211,5 +265,120 @@ export function processGifElement(element: Element, _options: Required<RehypeGif
   };
 }
 
-// Script injection functions removed - use client import instead:
-// import '@benjc/rehype-gif-controls/client';
+/**
+ * Securely inject the client script into the document
+ * Only injects the bundled script, no arbitrary URLs allowed
+ */
+export function injectClientScript(tree: any): void {
+  // For fragments or when we can't find proper HTML structure,
+  // append script to the root children
+  if (tree.type === 'root') {
+    // Check if script is already injected
+    const existingScript = findScriptInTree(tree);
+    if (existingScript) {
+      return; // Already injected
+    }
+
+    // Look for html > head structure first
+    const htmlElement = tree.children?.find((child: any) => child.tagName === 'html');
+    if (htmlElement) {
+      let headElement = htmlElement.children?.find((child: any) => child.tagName === 'head');
+
+      if (!headElement) {
+        headElement = {
+          type: 'element',
+          tagName: 'head',
+          properties: {},
+          children: [],
+        };
+
+        if (!htmlElement.children) {
+          htmlElement.children = [];
+        }
+        htmlElement.children.unshift(headElement);
+      }
+
+      // Create secure script element
+      const scriptElement: Element = {
+        type: 'element',
+        tagName: 'script',
+        properties: {
+          type: 'module',
+          'data-gif-controls-script': 'true',
+          src: './lib/client.js', // Relative path to bundled script only
+        },
+        children: [],
+      };
+
+      if (!headElement.children) {
+        headElement.children = [];
+      }
+      headElement.children.push(scriptElement);
+      return;
+    }
+
+    // Fallback: Look for head or body element at root level
+    let targetElement = tree.children?.find((child: any) =>
+      child.tagName === 'head' || child.tagName === 'body'
+    );
+
+    if (!targetElement) {
+      // Last resort: append to root children (for fragments)
+      const scriptElement: Element = {
+        type: 'element',
+        tagName: 'script',
+        properties: {
+          type: 'module',
+          'data-gif-controls-script': 'true',
+          src: './lib/client.js',
+        },
+        children: [],
+      };
+
+      if (!tree.children) {
+        tree.children = [];
+      }
+      tree.children.push(scriptElement);
+      return;
+    }
+
+    // Inject into found head/body element
+    const scriptElement: Element = {
+      type: 'element',
+      tagName: 'script',
+      properties: {
+        type: 'module',
+        'data-gif-controls-script': 'true',
+        src: './lib/client.js',
+      },
+      children: [],
+    };
+
+    if (!targetElement.children) {
+      targetElement.children = [];
+    }
+    targetElement.children.push(scriptElement);
+  }
+}
+
+/**
+ * Recursively find script in tree to avoid duplicates
+ */
+function findScriptInTree(node: any): boolean {
+  if (
+    node.tagName === 'script' &&
+    node.properties?.['data-gif-controls-script'] === 'true'
+  ) {
+    return true;
+  }
+
+  if (node.children) {
+    for (const child of node.children) {
+      if (findScriptInTree(child)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}

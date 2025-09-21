@@ -1,7 +1,7 @@
-type Element = any;
+import type { Element } from 'hast';
 
 /**
- * Configuration options for gifplayer.js integration
+ * Configuration options for the built-in gif-player web component
  */
 export interface GifPlayerOptions {
   /**
@@ -60,15 +60,10 @@ export interface RehypeGifControlsOptions {
   extensions?: string[];
 
   /**
-   * Whether to inject the gifplayer.js client script
+   * Whether to automatically inject the client-side script
    * @default true
    */
   injectScript?: boolean;
-
-  /**
-   * Custom gifplayer.js script URL (if not using the bundled version)
-   */
-  scriptUrl?: string;
 
   /**
    * Additional data attributes to add to GIF containers

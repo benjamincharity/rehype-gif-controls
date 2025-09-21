@@ -10,7 +10,12 @@
       "Bash(npm run test:*)",
       "Bash(npm unlink:*)",
       "Bash(npm install:*)",
-      "Bash(npm test)"
+      "Bash(npm test)",
+      "Bash(grep:*)",
+      "Read(//private/tmp/**)",
+      "Read(//tmp/gif-player/src/**)",
+      "Bash(npm run lint)",
+      "Bash(npm run typecheck:*)"
     ],
     "deny": [],
     "ask": []

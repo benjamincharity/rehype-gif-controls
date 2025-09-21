@@ -1,7 +1,7 @@
 {
   "name": "@benjc/rehype-gif-controls",
   "version": "1.0.0",
-  "description": "A rehype plugin that adds interactive GIF controls with play-count limits and click-to-replay functionality",
+  "description": "A rehype plugin that automatically adds interactive controls to GIF images with responsive canvas rendering, auto-play limits, and click-to-replay functionality",
   "keywords": [
     "rehype",
     "plugin",
@@ -10,7 +10,12 @@
     "controls",
     "mdx",
     "markdown",
-    "html"
+    "html",
+    "canvas",
+    "responsive",
+    "self-contained",
+    "bem",
+    "web-component"
   ],
   "homepage": "https://github.com/benjamincharity/rehype-gif-controls",
   "bugs": {
@@ -48,7 +53,7 @@
     "lib/"
   ],
   "scripts": {
-    "build": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "build": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json && cp -r src/gif-player lib/",
     "clean": "rimraf lib",
     "dev": "tsc --project tsconfig.build.json --watch",
     "format": "prettier --write .",
@@ -60,7 +65,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "gif-player": "github:CaptainCodeman/gif-player",
     "unist-util-visit": "^5.0.0"
   },
   "peerDependencies": {
@@ -88,6 +92,9 @@
   },
   "xo": {
     "prettier": true,
+    "ignores": [
+      "src/gif-player/omggif.js"
+    ],
     "rules": {
       "unicorn/prefer-node-protocol": "off"
     }
