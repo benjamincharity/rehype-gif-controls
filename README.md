@@ -78,90 +78,33 @@ import '@benjc/rehype-gif-controls/client';
 ></script>
 ```
 
-## Usage Examples
+## Usage Example
 
-### Next.js with MDX
+### Basic Rehype Pipeline
 
-```javascript
-// next.config.js
-const withMDX = require('@next/mdx')({
-  extension: /\.mdx?$/,
-  options: {
-    rehypePlugins: [
-      [
-        '@benjc/rehype-gif-controls',
-        {
-          gifPlayer: {
-            delay: 1000,
-            autoplay: true,
-          },
-        },
-      ],
-    ],
-  },
-});
-
-module.exports = withMDX({
-  pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
-});
-```
-
-That's it! The script is automatically injected when GIFs are processed.
-
-### Astro
-
-```javascript
-// astro.config.mjs
-import { defineConfig } from 'astro/config';
+```typescript
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
 import rehypeGifControls from '@benjc/rehype-gif-controls';
+import rehypeStringify from 'rehype-stringify';
 
-export default defineConfig({
-  markdown: {
-    rehypePlugins: [
-      [
-        '@benjc/rehype-gif-controls',
-        {
-          gifPlayer: {
-            delay: 500,
-            autoplay: true,
-          },
-        },
-      ],
-    ],
-  },
-});
+const processor = unified()
+  .use(remarkParse)
+  .use(remarkRehype)
+  .use(rehypeGifControls, {
+    gifPlayer: {
+      delay: 500,
+      autoplay: true,
+    },
+  })
+  .use(rehypeStringify);
+
+const markdown = '![Animation](./demo.gif)';
+const result = await processor.process(markdown);
 ```
 
-No additional imports needed - the script is auto-injected!
-
-### Docusaurus
-
-```javascript
-// docusaurus.config.js
-const config = {
-  presets: [
-    [
-      'classic',
-      {
-        docs: {
-          beforeDefaultRemarkPlugins: [],
-          beforeDefaultRehypePlugins: [
-            [
-              '@benjc/rehype-gif-controls',
-              {
-                gifPlayer: {
-                  autoplay: true,
-                  delay: 1000,
-                },
-              },
-            ],
-          ],
-        },
-      },
-    ],
-  ],
-};
-```
+The plugin automatically injects the client script when GIFs are found. No additional imports needed for basic usage.
 
 ## Configuration Options
 
@@ -197,56 +140,6 @@ interface RehypeGifControlsOptions {
 }
 ```
 
-### Example Configurations
-
-#### Auto-play with Delay
-
-```typescript
-.use(rehypeGifControls, {
-  gifPlayer: {
-    autoplay: true,
-    delay: 2000,        // Wait 2 seconds before starting
-  },
-});
-```
-
-#### Security-Focused Setup
-
-```typescript
-.use(rehypeGifControls, {
-  security: {
-    allowedDomains: ['cdn.mysite.com', 'trusted-images.com'],
-    sanitizeAttributes: true,
-  },
-});
-```
-
-#### Custom Styling Classes
-
-```typescript
-.use(rehypeGifControls, {
-  gifPlayer: {
-    wrapperClasses: ['my-gif-container', 'rounded'],
-    gifClasses: ['responsive-gif'],
-  },
-  dataAttributes: {
-    'data-analytics': 'gif-interaction',
-    'data-component': 'interactive-media',
-  },
-});
-```
-
-#### Performance Optimized
-
-```typescript
-.use(rehypeGifControls, {
-  gifPlayer: {
-    preload: false,     // Don't preload frames
-    showLoader: false,  // No loading indicator
-    autoplay: false,    // Manual play only
-  },
-});
-```
 
 ## BEM CSS Classes & Styling
 
@@ -297,39 +190,6 @@ The gif-player web component handles responsive behavior automatically with thes
 }
 ```
 
-### Custom Styling Examples
-
-```css
-/* Add spacing around GIFs */
-.gif-controls {
-  margin: 1.5rem 0;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-/* Style based on auto-play state */
-.gif-controls[data-gif-controls-autoplay='false'] {
-  border: 2px dashed #ccc;
-}
-
-/* Loading state styling */
-.gif-controls[data-gif-controls-show-loader='true'] {
-  min-height: 200px;
-  background-color: #f5f5f5;
-}
-
-/* Custom wrapper classes */
-.my-gif-container {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Responsive breakpoints */
-@media (max-width: 768px) {
-  .gif-controls {
-    margin: 1rem 0;
-  }
-}
-```
 
 ## gif-player Web Component Features
 
@@ -370,61 +230,6 @@ For advanced use cases where you want to disable auto-injection:
 
 // 2. Manually import the client
 import '@benjc/rehype-gif-controls/client';
-```
-
-### Manual Control
-
-```typescript
-// For more control over initialization
-import { initGifControls } from '@benjc/rehype-gif-controls/client';
-
-// Initialize manually
-initGifControls();
-
-// Re-initialize after dynamic content changes
-document.addEventListener('contentLoaded', () => {
-  initGifControls();
-});
-```
-
-### Framework Integration
-
-#### React
-
-```tsx
-import { useEffect } from 'react';
-import { initGifControls } from '@benjc/rehype-gif-controls/client';
-
-function MyComponent() {
-  useEffect(() => {
-    // Initialize GIFs after component mounts
-    initGifControls();
-  }, []);
-
-  return <div dangerouslySetInnerHTML={{ __html: processedMarkdown }} />;
-}
-```
-
-#### Vue
-
-```vue
-<template>
-  <div v-html="processedMarkdown"></div>
-</template>
-
-<script>
-import { initGifControls } from '@benjc/rehype-gif-controls/client';
-
-export default {
-  mounted() {
-    initGifControls();
-  },
-  updated() {
-    // Re-initialize if content changes
-    initGifControls();
-  },
-};
-</script>
 ```
 
 ## Security Considerations
