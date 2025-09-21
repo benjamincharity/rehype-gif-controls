@@ -35,7 +35,10 @@
     "email": "ben@benjamincharity.com",
     "url": "https://benjamincharity.com"
   },
-  "sideEffects": ["./lib/client.js", "./src/client.ts"],
+  "sideEffects": [
+    "./lib/client.js",
+    "./src/client.ts"
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -93,7 +96,7 @@
   "xo": {
     "prettier": true,
     "ignores": [
-      "src/gif-player/omggif.js"
+      "src/gif-player/"
     ],
     "rules": {
       "unicorn/prefer-node-protocol": "off"

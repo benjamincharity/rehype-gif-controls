@@ -37,13 +37,16 @@ async function testPlugin() {
 
     // Check if GIFs were processed
     const output = result.toString();
-    const gifControlsCount = (output.match(/data-gif-controls="true"/g) || []).length;
+    const gifControlsCount = (output.match(/data-gif-controls="true"/g) || [])
+      .length;
     const wrapperCount = (output.match(/gif-controls-wrapper/g) || []).length;
 
     console.log('\n🔍 Results:');
     console.log(`- GIF controls added: ${gifControlsCount} (expected: 2)`);
     console.log(`- Wrapper elements: ${wrapperCount} (expected: 2)`);
-    console.log(`- Regular image unchanged: ${output.includes('regular.jpg') && !output.includes('data-gif-controls') ? '✅' : '❌'}`);
+    console.log(
+      `- Regular image unchanged: ${output.includes('regular.jpg') && !output.includes('data-gif-controls') ? '✅' : '❌'}`
+    );
 
     if (gifControlsCount === 2 && wrapperCount === 2) {
       console.log('\n🎉 All tests passed!');
@@ -52,7 +55,6 @@ async function testPlugin() {
       console.log('\n❌ Some tests failed!');
       return false;
     }
-
   } catch (error) {
     console.error('❌ Plugin test failed:', error.message);
     console.error(error.stack);
@@ -60,6 +62,6 @@ async function testPlugin() {
   }
 }
 
-testPlugin().then(success => {
+testPlugin().then((success) => {
   process.exit(success ? 0 : 1);
 });

@@ -26,7 +26,9 @@ export const defaultOptions: Required<RehypeGifControlsOptions> = {
 /**
  * Merge user options with defaults
  */
-export function mergeOptions(userOptions: RehypeGifControlsOptions = {}): Required<RehypeGifControlsOptions> {
+export function mergeOptions(
+  userOptions: RehypeGifControlsOptions = {}
+): Required<RehypeGifControlsOptions> {
   return {
     ...defaultOptions,
     ...userOptions,
@@ -107,7 +109,10 @@ function extractFileExtension(src: string): string | null {
 /**
  * Get attribute value from element
  */
-export function getAttributeValue(element: Element, name: string): string | undefined {
+export function getAttributeValue(
+  element: Element,
+  name: string
+): string | undefined {
   const properties = element.properties;
   if (!properties) return undefined;
 
@@ -118,7 +123,11 @@ export function getAttributeValue(element: Element, name: string): string | unde
 /**
  * Set attribute value on element
  */
-export function setAttributeValue(element: Element, name: string, value: string): void {
+export function setAttributeValue(
+  element: Element,
+  name: string,
+  value: string
+): void {
   if (!element.properties) {
     element.properties = {};
   }
@@ -152,7 +161,10 @@ export function sanitizeAttribute(value: string): string {
 /**
  * Validate GIF source URL against security rules
  */
-export function validateGifSource(src: string, allowedDomains: string[]): boolean {
+export function validateGifSource(
+  src: string,
+  allowedDomains: string[]
+): boolean {
   // Allow data URIs
   if (src.startsWith('data:')) {
     return src.startsWith('data:image/gif');
@@ -167,8 +179,8 @@ export function validateGifSource(src: string, allowedDomains: string[]): boolea
     const url = new URL(src);
     const domain = url.hostname;
 
-    return allowedDomains.some(allowed =>
-      domain === allowed || domain.endsWith('.' + allowed)
+    return allowedDomains.some(
+      (allowed) => domain === allowed || domain.endsWith('.' + allowed)
     );
   } catch {
     // For relative URLs, allow them if no domain restrictions or if they're just filenames
@@ -191,7 +203,9 @@ export function createGifWrapper(
   ].join(' ');
 
   // Sanitize the src attribute for security
-  const sanitizedSrc = security.sanitizeAttributes ? sanitizeAttribute(gifElement.src) : gifElement.src;
+  const sanitizedSrc = security.sanitizeAttributes
+    ? sanitizeAttribute(gifElement.src)
+    : gifElement.src;
 
   // Create the gif-player web component
   const gifPlayerElement: Element = {
@@ -233,7 +247,10 @@ export function createGifWrapper(
 
   // Calculate and store aspect ratio if dimensions are available
   if (gifElement.width && gifElement.height) {
-    const aspectRatio = (parseInt(gifElement.height) / parseInt(gifElement.width) * 100).toFixed(2);
+    const aspectRatio = (
+      (parseInt(gifElement.height) / parseInt(gifElement.width)) *
+      100
+    ).toFixed(2);
     setAttributeValue(wrapper, 'data-gif-controls-aspect-ratio', aspectRatio);
   }
 
@@ -250,7 +267,10 @@ export function createGifWrapper(
 /**
  * Process GIF element - extract metadata for gif-player
  */
-export function processGifElement(element: Element, _options: Required<RehypeGifControlsOptions>): ProcessedGifElement {
+export function processGifElement(
+  element: Element,
+  _options: Required<RehypeGifControlsOptions>
+): ProcessedGifElement {
   const src = getAttributeValue(element, 'src') || '';
   const alt = getAttributeValue(element, 'alt');
   const width = getAttributeValue(element, 'width');
@@ -280,9 +300,13 @@ export function injectClientScript(tree: any): void {
     }
 
     // Look for html > head structure first
-    const htmlElement = tree.children?.find((child: any) => child.tagName === 'html');
+    const htmlElement = tree.children?.find(
+      (child: any) => child.tagName === 'html'
+    );
     if (htmlElement) {
-      let headElement = htmlElement.children?.find((child: any) => child.tagName === 'head');
+      let headElement = htmlElement.children?.find(
+        (child: any) => child.tagName === 'head'
+      );
 
       if (!headElement) {
         headElement = {
@@ -318,8 +342,8 @@ export function injectClientScript(tree: any): void {
     }
 
     // Fallback: Look for head or body element at root level
-    let targetElement = tree.children?.find((child: any) =>
-      child.tagName === 'head' || child.tagName === 'body'
+    let targetElement = tree.children?.find(
+      (child: any) => child.tagName === 'head' || child.tagName === 'body'
     );
 
     if (!targetElement) {

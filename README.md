@@ -31,8 +31,7 @@ npm install @benjc/rehype-gif-controls
 import { unified } from 'unified';
 import rehypeGifControls from '@benjc/rehype-gif-controls';
 
-const processor = unified()
-  .use(rehypeGifControls);
+const processor = unified().use(rehypeGifControls);
 ```
 
 ### 2. That's it!
@@ -56,19 +55,27 @@ import '@benjc/rehype-gif-controls/client';
 ### 4. Generated Output (with Auto-Injected Script)
 
 ```html
-<div class="gif-controls"
-     data-gif-controls="true"
-     data-gif-controls-delay="500"
-     data-gif-controls-autoplay="true">
-  <gif-player src="./demo.gif"
-              class="gif-controls__player"
-              repeat
-              alt="Animated demo">
+<div
+  class="gif-controls"
+  data-gif-controls="true"
+  data-gif-controls-delay="500"
+  data-gif-controls-autoplay="true"
+>
+  <gif-player
+    src="./demo.gif"
+    class="gif-controls__player"
+    repeat
+    alt="Animated demo"
+  >
   </gif-player>
 </div>
 
 <!-- Auto-injected script -->
-<script type="module" data-gif-controls-script="true" src="./lib/client.js"></script>
+<script
+  type="module"
+  data-gif-controls-script="true"
+  src="./lib/client.js"
+></script>
 ```
 
 ## Usage Examples
@@ -81,12 +88,15 @@ const withMDX = require('@next/mdx')({
   extension: /\.mdx?$/,
   options: {
     rehypePlugins: [
-      ['@benjc/rehype-gif-controls', {
-        gifPlayer: {
-          delay: 1000,
-          autoplay: true,
+      [
+        '@benjc/rehype-gif-controls',
+        {
+          gifPlayer: {
+            delay: 1000,
+            autoplay: true,
+          },
         },
-      }],
+      ],
     ],
   },
 });
@@ -108,12 +118,15 @@ import rehypeGifControls from '@benjc/rehype-gif-controls';
 export default defineConfig({
   markdown: {
     rehypePlugins: [
-      ['@benjc/rehype-gif-controls', {
-        gifPlayer: {
-          delay: 500,
-          autoplay: true,
+      [
+        '@benjc/rehype-gif-controls',
+        {
+          gifPlayer: {
+            delay: 500,
+            autoplay: true,
+          },
         },
-      }],
+      ],
     ],
   },
 });
@@ -133,12 +146,15 @@ const config = {
         docs: {
           beforeDefaultRemarkPlugins: [],
           beforeDefaultRehypePlugins: [
-            ['@benjc/rehype-gif-controls', {
-              gifPlayer: {
-                autoplay: true,
-                delay: 1000,
+            [
+              '@benjc/rehype-gif-controls',
+              {
+                gifPlayer: {
+                  autoplay: true,
+                  delay: 1000,
+                },
               },
-            }],
+            ],
           ],
         },
       },
@@ -155,27 +171,27 @@ const config = {
 interface RehypeGifControlsOptions {
   // GIF player behavior configuration
   gifPlayer?: {
-    delay?: number;               // Delay before auto-play (ms) - default: 500
-    autoplay?: boolean;           // Enable auto-play - default: true
-    preload?: boolean;            // Preload GIF frames - default: true
-    showLoader?: boolean;         // Show loading spinner - default: true
-    wrapperClasses?: string[];    // Custom CSS classes for wrapper
-    gifClasses?: string[];        // Custom CSS classes for gif-player
+    delay?: number; // Delay before auto-play (ms) - default: 500
+    autoplay?: boolean; // Enable auto-play - default: true
+    preload?: boolean; // Preload GIF frames - default: true
+    showLoader?: boolean; // Show loading spinner - default: true
+    wrapperClasses?: string[]; // Custom CSS classes for wrapper
+    gifClasses?: string[]; // Custom CSS classes for gif-player
   };
 
   // File detection
-  selector?: string;              // Custom selector override
-  extensions?: string[];          // File extensions to treat as GIFs - default: ['gif']
+  selector?: string; // Custom selector override
+  extensions?: string[]; // File extensions to treat as GIFs - default: ['gif']
 
   // Script injection (automatic by default)
-  injectScript?: boolean;         // default: true
+  injectScript?: boolean; // default: true
 
   // Data attributes
   dataAttributes?: Record<string, string>; // Custom data attributes
 
   // Security
   security?: {
-    allowedDomains?: string[];    // Allowed domains for GIF sources
+    allowedDomains?: string[]; // Allowed domains for GIF sources
     sanitizeAttributes?: boolean; // Sanitize attributes - default: true
   };
 }
@@ -240,14 +256,18 @@ This package follows [BEM methodology](http://getbem.com/) for CSS class naming:
 
 ```css
 /* Block: Main wrapper */
-.gif-controls { }
+.gif-controls {
+}
 
 /* Element: GIF player component */
-.gif-controls__player { }
+.gif-controls__player {
+}
 
 /* Internal gif-player elements (in shadow DOM) */
-.gif-player__canvas { }
-.gif-player__spinner { }
+.gif-player__canvas {
+}
+.gif-player__spinner {
+}
 ```
 
 ### Data Attributes (BEM-style)
@@ -288,19 +308,19 @@ The gif-player web component handles responsive behavior automatically with thes
 }
 
 /* Style based on auto-play state */
-.gif-controls[data-gif-controls-autoplay="false"] {
+.gif-controls[data-gif-controls-autoplay='false'] {
   border: 2px dashed #ccc;
 }
 
 /* Loading state styling */
-.gif-controls[data-gif-controls-show-loader="true"] {
+.gif-controls[data-gif-controls-show-loader='true'] {
   min-height: 200px;
   background-color: #f5f5f5;
 }
 
 /* Custom wrapper classes */
 .my-gif-container {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive breakpoints */
@@ -402,8 +422,8 @@ export default {
   updated() {
     // Re-initialize if content changes
     initGifControls();
-  }
-}
+  },
+};
 </script>
 ```
 
@@ -442,19 +462,20 @@ Multi-layered XSS protection includes:
 
 ```typescript
 // Dangerous input examples that are automatically sanitized:
-'<img src="evil.gif" alt="<script>alert(\'xss\')</script>" />'
-'<img src="evil.gif" alt="javascript:alert(1)" />'
-'<img src="evil.gif" alt="onclick=malicious()" />'
-'<img src="evil.gif" alt="data:text/html,<script>alert(1)</script>" />'
+'<img src="evil.gif" alt="<script>alert(\'xss\')</script>" />';
+'<img src="evil.gif" alt="javascript:alert(1)" />';
+'<img src="evil.gif" alt="onclick=malicious()" />';
+'<img src="evil.gif" alt="data:text/html,<script>alert(1)</script>" />';
 
 // Safe sanitized output
-'data-gif-controls-alt="scriptalert(xss)"'
-'data-gif-controls-alt="javascriptalert(1)"'
-'data-gif-controls-alt="onclickmalicious()"'
-'data-gif-controls-alt="alert(1)"'
+'data-gif-controls-alt="scriptalert(xss)"';
+'data-gif-controls-alt="javascriptalert(1)"';
+'data-gif-controls-alt="onclickmalicious()"';
+'data-gif-controls-alt="alert(1)"';
 ```
 
 **Protection Features**:
+
 - ✅ Removes HTML tags and dangerous characters
 - ✅ Blocks JavaScript protocols and event handlers
 - ✅ Prevents HTML entity bypass attacks
@@ -500,17 +521,20 @@ Content-Security-Policy: script-src 'self' 'unsafe-inline'; worker-src 'self' bl
 ## Browser Support
 
 ### Modern Browsers (Full Support)
+
 - Chrome 64+
 - Firefox 53+
 - Safari 11.1+
 - Edge 79+
 
 ### Legacy Support
+
 - Graceful degradation to standard `<img>` tags
 - Web Components polyfill can extend support to IE11
 - Core functionality works without JavaScript
 
 ### Mobile Support
+
 - iOS Safari 11.1+
 - Chrome Mobile 64+
 - Samsung Internet 7.2+
@@ -570,6 +594,7 @@ Enable console logging for troubleshooting:
 #### Breaking Changes
 
 1. **Script injection now secure by default**:
+
    ```typescript
    // Old (insecure)
    .use(rehypeGifControls, {
@@ -586,6 +611,7 @@ Enable console logging for troubleshooting:
    ```
 
 2. **Data attribute naming**:
+
    ```css
    /* Old */
    [data-delay="500"]
@@ -606,13 +632,17 @@ Enable console logging for troubleshooting:
 #### Migration Steps
 
 1. **Update plugin usage** (most users can just remove configuration):
+
    ```diff
    .use(rehypeGifControls, {
    -   injectScript: true,
    -   scriptUrl: 'custom-url',
    });
 
+   ```
+
 2. **Update CSS selectors**:
+
    ```diff
    - [data-delay]
    + [data-gif-controls-delay]

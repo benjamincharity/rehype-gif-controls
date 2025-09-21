@@ -12,11 +12,12 @@
   display: block;
 }
 
-
 /* Loading state */
-.gif-controls-wrapper[data-show-loader="true"] .gif-controls-image {
+.gif-controls-wrapper[data-show-loader='true'] .gif-controls-image {
   min-height: 100px;
-  background: #f5f5f5 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 50 50"><path fill="%23999" d="M25 5A20 20 0 1 1 5 25a20 20 0 0 1 20-20m0-5A25 25 0 1 0 50 25A25 25 0 0 0 25 0Z" opacity=".4"/><path fill="%23999" d="M25 0A25 25 0 0 1 50 25h-5A20 20 0 0 0 25 5V0Z"><animateTransform attributeName="transform" dur="1s" repeatCount="indefinite" type="rotate" values="0 25 25;360 25 25"/></path></svg>') no-repeat center center;
+  background: #f5f5f5
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 50 50"><path fill="%23999" d="M25 5A20 20 0 1 1 5 25a20 20 0 0 1 20-20m0-5A25 25 0 1 0 50 25A25 25 0 0 0 25 0Z" opacity=".4"/><path fill="%23999" d="M25 0A25 25 0 0 1 50 25h-5A20 20 0 0 0 25 5V0Z"><animateTransform attributeName="transform" dur="1s" repeatCount="indefinite" type="rotate" values="0 25 25;360 25 25"/></path></svg>')
+    no-repeat center center;
   background-size: 30px 30px;
 }
 
@@ -29,7 +30,6 @@
   .gif-controls-image {
     width: 100%;
   }
-
 }
 
 /* Reduced motion support */

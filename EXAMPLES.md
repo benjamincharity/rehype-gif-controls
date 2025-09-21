@@ -83,12 +83,15 @@ const withMDX = require('@next/mdx')({
   extension: /\.mdx?$/,
   options: {
     rehypePlugins: [
-      ['@benjc/rehype-gif-controls', {
-        gifPlayer: {
-          delay: 1000,
-          autoplay: true,
+      [
+        '@benjc/rehype-gif-controls',
+        {
+          gifPlayer: {
+            delay: 1000,
+            autoplay: true,
+          },
         },
-      }],
+      ],
     ],
   },
 });
@@ -157,12 +160,15 @@ import rehypeGifControls from '@benjc/rehype-gif-controls';
 export default defineConfig({
   markdown: {
     rehypePlugins: [
-      ['@benjc/rehype-gif-controls', {
-        gifPlayer: {
-          delay: 500,
-          autoplay: true,
+      [
+        '@benjc/rehype-gif-controls',
+        {
+          gifPlayer: {
+            delay: 500,
+            autoplay: true,
+          },
         },
-      }],
+      ],
     ],
   },
 });
@@ -207,32 +213,36 @@ const config = {
       {
         docs: {
           beforeDefaultRehypePlugins: [
-            ['@benjc/rehype-gif-controls', {
-              gifPlayer: {
-                autoplay: true,
-                delay: 1000,
+            [
+              '@benjc/rehype-gif-controls',
+              {
+                gifPlayer: {
+                  autoplay: true,
+                  delay: 1000,
+                },
+                security: {
+                  allowedDomains: ['cdn.mysite.com'],
+                },
               },
-              security: {
-                allowedDomains: ['cdn.mysite.com'],
-              },
-            }],
+            ],
           ],
         },
         blog: {
           beforeDefaultRehypePlugins: [
-            ['@benjc/rehype-gif-controls', {
-              gifPlayer: {
-                autoplay: false, // Disable autoplay in blog
+            [
+              '@benjc/rehype-gif-controls',
+              {
+                gifPlayer: {
+                  autoplay: false, // Disable autoplay in blog
+                },
               },
-            }],
+            ],
           ],
         },
       },
     ],
   ],
-  clientModules: [
-    require.resolve('@benjc/rehype-gif-controls/client'),
-  ],
+  clientModules: [require.resolve('@benjc/rehype-gif-controls/client')],
 };
 
 module.exports = config;
@@ -249,7 +259,7 @@ module.exports = config;
   border-radius: var(--ifm-border-radius);
 }
 
-.gif-controls[data-gif-controls-autoplay="false"] {
+.gif-controls[data-gif-controls-autoplay='false'] {
   border-style: dashed;
   opacity: 0.8;
 }
@@ -267,12 +277,15 @@ module.exports = {
       resolve: 'gatsby-plugin-mdx',
       options: {
         rehypePlugins: [
-          ['@benjc/rehype-gif-controls', {
-            gifPlayer: {
-              autoplay: true,
-              delay: 500,
+          [
+            '@benjc/rehype-gif-controls',
+            {
+              gifPlayer: {
+                autoplay: true,
+                delay: 500,
+              },
             },
-          }],
+          ],
         ],
       },
     },
@@ -475,24 +488,26 @@ import '@benjc/rehype-gif-controls/client';
 
 ```css
 /* Style based on autoplay state */
-.gif-controls[data-gif-controls-autoplay="true"] {
+.gif-controls[data-gif-controls-autoplay='true'] {
   border: 2px solid #28a745;
 }
 
-.gif-controls[data-gif-controls-autoplay="false"] {
+.gif-controls[data-gif-controls-autoplay='false'] {
   border: 2px dashed #6c757d;
 }
 
 /* Style based on loading state */
-.gif-controls[data-gif-controls-show-loader="true"]:not([data-initialized]) {
+.gif-controls[data-gif-controls-show-loader='true']:not([data-initialized]) {
   min-height: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.gif-controls[data-gif-controls-show-loader="true"]:not([data-initialized])::before {
-  content: "Loading GIF...";
+.gif-controls[data-gif-controls-show-loader='true']:not(
+    [data-initialized]
+  )::before {
+  content: 'Loading GIF...';
   color: #6c757d;
   font-style: italic;
 }
@@ -505,7 +520,9 @@ import '@benjc/rehype-gif-controls/client';
 .gif-controls {
   opacity: 0;
   transform: translateY(20px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 
 .gif-controls[data-initialized] {
@@ -517,7 +534,9 @@ import '@benjc/rehype-gif-controls/client';
 .gif-controls:hover {
   transform: scale(1.02);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 ```
 

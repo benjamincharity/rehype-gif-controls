@@ -48,7 +48,7 @@ describe('rehype-gif-controls', () => {
     it('should respect custom delay', async () => {
       const input = '<img src="test.gif" alt="Test GIF">';
       const result = await process(input, {
-        gifPlayer: { delay: 1000 }
+        gifPlayer: { delay: 1000 },
       });
 
       expect(result).toContain('data-gif-controls-delay="1000"');
@@ -57,7 +57,7 @@ describe('rehype-gif-controls', () => {
     it('should respect autoplay disabled', async () => {
       const input = '<img src="test.gif" alt="Test GIF">';
       const result = await process(input, {
-        gifPlayer: { autoplay: false }
+        gifPlayer: { autoplay: false },
       });
 
       expect(result).toContain('data-gif-controls-autoplay="false"');
@@ -66,7 +66,7 @@ describe('rehype-gif-controls', () => {
     it('should add custom wrapper classes', async () => {
       const input = '<img src="test.gif" alt="Test GIF">';
       const result = await process(input, {
-        gifPlayer: { wrapperClasses: ['custom-wrapper', 'animated'] }
+        gifPlayer: { wrapperClasses: ['custom-wrapper', 'animated'] },
       });
 
       expect(result).toContain('custom-wrapper');
@@ -78,7 +78,7 @@ describe('rehype-gif-controls', () => {
     it('should handle custom extensions', async () => {
       const input = '<img src="test.webp" alt="Test WebP">';
       const result = await process(input, {
-        extensions: ['webp', 'gif']
+        extensions: ['webp', 'gif'],
       });
 
       expect(result).toContain('data-gif-controls="true"');
@@ -92,7 +92,7 @@ describe('rehype-gif-controls', () => {
         <img src="https://untrusted.com/test.gif" alt="Untrusted GIF">
       `;
       const result = await process(input, {
-        security: { allowedDomains: ['trusted.com'] }
+        security: { allowedDomains: ['trusted.com'] },
       });
 
       const matches = result.match(/data-gif-controls="true"/g);
@@ -100,16 +100,18 @@ describe('rehype-gif-controls', () => {
     });
 
     it('should allow data URIs for GIFs', async () => {
-      const input = '<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Data URI GIF">';
+      const input =
+        '<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Data URI GIF">';
       const result = await process(input, {
-        security: { allowedDomains: ['example.com'] }
+        security: { allowedDomains: ['example.com'] },
       });
 
       expect(result).toContain('data-gif-controls="true"');
     });
 
     it('should sanitize alt text in data attributes', async () => {
-      const input = '<img src="test.gif" alt="Test <script>alert(1)</script> GIF">';
+      const input =
+        '<img src="test.gif" alt="Test <script>alert(1)</script> GIF">';
       const result = await process(input);
 
       expect(result).toContain('data-gif-controls-alt="Test alert(1) GIF"');
@@ -136,7 +138,9 @@ describe('rehype-gif-controls', () => {
       for (const input of xssVectors) {
         const result = await process(input);
         // Ensure no dangerous patterns remain
-        expect(result).not.toMatch(/<script|javascript:|onclick=|onload=|<iframe/i);
+        expect(result).not.toMatch(
+          /<script|javascript:|onclick=|onload=|<iframe/i
+        );
         expect(result).not.toMatch(/data:text\/html/i);
         expect(result).not.toMatch(/&lt;script|&gt;/i);
       }
@@ -144,9 +148,18 @@ describe('rehype-gif-controls', () => {
 
     it('should handle malicious file extensions safely', async () => {
       const maliciousInputs = [
-        { input: '<img src="test.gif?param=value" alt="Test">', shouldProcess: true },
-        { input: '<img src="test.gif#fragment" alt="Test">', shouldProcess: true },
-        { input: '<img src="test.gif/../../../etc/passwd" alt="Test">', shouldProcess: false }, // Path traversal - should not be processed
+        {
+          input: '<img src="test.gif?param=value" alt="Test">',
+          shouldProcess: true,
+        },
+        {
+          input: '<img src="test.gif#fragment" alt="Test">',
+          shouldProcess: true,
+        },
+        {
+          input: '<img src="test.gif/../../../etc/passwd" alt="Test">',
+          shouldProcess: false,
+        }, // Path traversal - should not be processed
       ];
 
       for (const { input, shouldProcess } of maliciousInputs) {
@@ -166,7 +179,9 @@ describe('rehype-gif-controls', () => {
       const problematicUrls = [
         '<img src="test' + 'a'.repeat(10000) + '.gif" alt="Test">',
         '<img src="test.gif' + '?param=' + 'b'.repeat(10000) + '" alt="Test">',
-        '<img src="data:image/gif;base64,' + 'A'.repeat(10000) + '" alt="Test">',
+        '<img src="data:image/gif;base64,' +
+          'A'.repeat(10000) +
+          '" alt="Test">',
       ];
 
       for (const input of problematicUrls) {
@@ -183,7 +198,8 @@ describe('rehype-gif-controls', () => {
 
   describe('secure script injection', () => {
     it('should inject script when enabled and GIFs found', async () => {
-      const input = '<html><head></head><body><img src="test.gif" alt="Test"></body></html>';
+      const input =
+        '<html><head></head><body><img src="test.gif" alt="Test"></body></html>';
       const result = await process(input, { injectScript: true });
 
       expect(result).toContain('data-gif-controls-script="true"');
@@ -192,7 +208,8 @@ describe('rehype-gif-controls', () => {
     });
 
     it('should not inject script when disabled', async () => {
-      const input = '<html><head></head><body><img src="test.gif" alt="Test"></body></html>';
+      const input =
+        '<html><head></head><body><img src="test.gif" alt="Test"></body></html>';
       const result = await process(input, { injectScript: false });
 
       expect(result).not.toContain('data-gif-controls-script');
@@ -200,14 +217,16 @@ describe('rehype-gif-controls', () => {
     });
 
     it('should not inject script if no GIFs found', async () => {
-      const input = '<html><head></head><body><img src="test.jpg" alt="Test"></body></html>';
+      const input =
+        '<html><head></head><body><img src="test.jpg" alt="Test"></body></html>';
       const result = await process(input, { injectScript: true });
 
       expect(result).not.toContain('data-gif-controls-script');
     });
 
     it('should only inject script once for multiple GIFs', async () => {
-      const input = '<html><head></head><body><img src="first.gif" alt="First"><img src="second.gif" alt="Second"></body></html>';
+      const input =
+        '<html><head></head><body><img src="first.gif" alt="First"><img src="second.gif" alt="Second"></body></html>';
       const result = await process(input, { injectScript: true });
 
       const scriptMatches = result.match(/data-gif-controls-script="true"/g);
@@ -215,7 +234,8 @@ describe('rehype-gif-controls', () => {
     });
 
     it('should inject secure script attributes only', async () => {
-      const input = '<html><head></head><body><img src="test.gif" alt="Test"></body></html>';
+      const input =
+        '<html><head></head><body><img src="test.gif" alt="Test"></body></html>';
       const result = await process(input, { injectScript: true });
 
       // Should only allow bundled script path
@@ -232,8 +252,8 @@ describe('rehype-gif-controls', () => {
       const result = await process(input, {
         dataAttributes: {
           'data-custom': 'value',
-          'data-test': 'true'
-        }
+          'data-test': 'true',
+        },
       });
 
       expect(result).toContain('data-custom="value"');
@@ -261,7 +281,7 @@ describe('rehype-gif-controls', () => {
     it('should handle malformed URLs gracefully', async () => {
       const input = '<img src="not-a-valid-url.gif" alt="Malformed">';
       const result = await process(input, {
-        security: { allowedDomains: ['example.com'] }
+        security: { allowedDomains: ['example.com'] },
       });
 
       // Should still process since it's not a full URL
@@ -294,7 +314,8 @@ describe('rehype-gif-controls', () => {
     });
 
     it('should handle data URIs securely', async () => {
-      const validDataUri = '<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Valid GIF">';
+      const validDataUri =
+        '<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Valid GIF">';
       const invalidDataUris = [
         '<img src="data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==" alt="HTML Data URI">',
         '<img src="data:application/javascript;base64,YWxlcnQoMSk=" alt="JS Data URI">',

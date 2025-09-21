@@ -12,7 +12,7 @@
 
 import { GifReader } from './omggif.js';
 
-export default function() {
+export default function () {
   const template = document.createElement('template');
   template.innerHTML = `
 <style>
@@ -48,7 +48,17 @@ export default function() {
 
   class GifPlayer extends HTMLElement {
     static get observedAttributes() {
-      return [ 'src', 'frame', 'size', 'speed', 'play', 'swipe', 'repeat', 'bounce', 'direction' ];
+      return [
+        'src',
+        'frame',
+        'size',
+        'speed',
+        'play',
+        'swipe',
+        'repeat',
+        'bounce',
+        'direction',
+      ];
     }
 
     constructor() {
@@ -70,7 +80,7 @@ export default function() {
       this.prerenderFramesBound = this.prerenderFrames.bind(this);
       this.playLoopBound = this.playLoop.bind(this);
 
-      const shadowRoot = this.attachShadow({mode: 'open'});
+      const shadowRoot = this.attachShadow({ mode: 'open' });
       shadowRoot.appendChild(document.importNode(template.content, true));
 
       this._spinner = shadowRoot.querySelector('.gif-player__spinner');
@@ -113,11 +123,11 @@ export default function() {
       this._delays = [];
       this._frame = 0;
       this._decoded = -1;
-      this._rendered = -1;    // frame last rendered
+      this._rendered = -1; // frame last rendered
     }
 
     _handleBoolean(name, val) {
-      this['_' + name] = val = (val !== null && val !== undefined) ? true : false;
+      this['_' + name] = val = val !== null && val !== undefined ? true : false;
       if (val) {
         this.setAttribute(name, '');
       } else {
@@ -125,44 +135,84 @@ export default function() {
       }
     }
 
-    get src() { return this._src; }
+    get src() {
+      return this._src;
+    }
     set src(val) {
       this._src = val;
       this.load(val);
     }
 
-    get frame() { return this._frame; }
+    get frame() {
+      return this._frame;
+    }
     set frame(val) {
       this._frame = parseInt(val);
-      this.displayFrame(this._frames, this._frame)
+      this.displayFrame(this._frames, this._frame);
     }
 
-    get size() { return this._size; }
-    set size(val) { this._size = val; }
+    get size() {
+      return this._size;
+    }
+    set size(val) {
+      this._size = val;
+    }
 
-    get speed() { return this._speed; }
-    set speed(val) { this._speed = parseFloat(val); }
+    get speed() {
+      return this._speed;
+    }
+    set speed(val) {
+      this._speed = parseFloat(val);
+    }
 
-    get swipe() { return this._swipe; }
-    set swipe(val) { this._swipe = val; }
+    get swipe() {
+      return this._swipe;
+    }
+    set swipe(val) {
+      this._swipe = val;
+    }
 
-    get play() { return this._play; }
-    set play(val) { this._handleBoolean('play', val); }
+    get play() {
+      return this._play;
+    }
+    set play(val) {
+      this._handleBoolean('play', val);
+    }
 
-    get repeat() { return this._repeat; }
-    set repeat(val) { this._repeat = parseFloat(val); }
+    get repeat() {
+      return this._repeat;
+    }
+    set repeat(val) {
+      this._repeat = parseFloat(val);
+    }
 
-    get bounce() { return this._bounce; }
-    set bounce(val) { this._handleBoolean('bounce', val); }
+    get bounce() {
+      return this._bounce;
+    }
+    set bounce(val) {
+      this._handleBoolean('bounce', val);
+    }
 
-    get direction() { return this._direction; }
-    set direction(val) { this._direction = parseInt(val); }
+    get direction() {
+      return this._direction;
+    }
+    set direction(val) {
+      this._direction = parseInt(val);
+    }
 
-    get prerender() { return this._prerender; }
-    set prerender(val) { this._prerender = val; }
+    get prerender() {
+      return this._prerender;
+    }
+    set prerender(val) {
+      this._prerender = val;
+    }
 
-    get onload() { return this._onload; }
-    set onload(val) { this._onload = val; }
+    get onload() {
+      return this._onload;
+    }
+    set onload(val) {
+      this._onload = val;
+    }
 
     move(e) {
       e.preventDefault();
@@ -187,21 +237,27 @@ export default function() {
     load(src) {
       this._reset();
 
-      this.dispatchEvent(new CustomEvent('gif-loading', { bubbles: true, composed: true, detail: src }));
+      this.dispatchEvent(
+        new CustomEvent('gif-loading', {
+          bubbles: true,
+          composed: true,
+          detail: src,
+        })
+      );
       this._spinner.style.display = 'block';
 
       var options = {
         method: 'GET',
         mode: 'cors',
-        cache: 'default'
+        cache: 'default',
       };
 
       fetch(src, options)
-        .then(resp => resp.arrayBuffer())
-        .then(buf => new Uint8Array(buf))
-        .then(buf => new GifReader(buf))
-        .then(gif => this.process(gif))
-        .then(() => this._spinner.style.display = 'none');
+        .then((resp) => resp.arrayBuffer())
+        .then((buf) => new Uint8Array(buf))
+        .then((buf) => new GifReader(buf))
+        .then((gif) => this.process(gif))
+        .then(() => (this._spinner.style.display = 'none'));
     }
 
     process(gif) {
@@ -246,13 +302,13 @@ export default function() {
           if (gifRatio > eleRatio) {
             width = this.clientWidth;
             height = this.clientWidth / gifRatio;
-            this._canvas.style.top = ((this.clientHeight - height) / 2) + 'px';
+            this._canvas.style.top = (this.clientHeight - height) / 2 + 'px';
             this._canvas.style.left = 0;
           } else {
             width = this.clientHeight * gifRatio;
             height = this.clientHeight;
             this._canvas.style.top = 0;
-            this._canvas.style.left = ((this.clientWidth - width) / 2) + 'px';
+            this._canvas.style.left = (this.clientWidth - width) / 2 + 'px';
           }
           this._canvas.style.width = width + 'px';
           this._canvas.style.height = height + 'px';
@@ -273,7 +329,11 @@ export default function() {
         this._frame = this._frames.length + this._frame;
       }
 
-      var e = new CustomEvent('gif-loaded', { bubbles: true, composed: true, detail: gif });
+      var e = new CustomEvent('gif-loaded', {
+        bubbles: true,
+        composed: true,
+        detail: gif,
+      });
       this.dispatchEvent(e);
       if (this._onload) {
         this._onload(e);
@@ -282,7 +342,7 @@ export default function() {
       if (this._play) {
         this.start();
       } else {
-        this.displayFrame(this._frames, this._frame)
+        this.displayFrame(this._frames, this._frame);
       }
 
       if (this._prerender) {
@@ -325,29 +385,32 @@ export default function() {
       if (frames.length === 0) return;
 
       this.renderFrame(frame);
-      setTimeout(() => {
-        if (this.paused) {
-          return;
-        }
-        var frame = this.frame + this._direction;
-        if (frame < 0) {
-          if (this._bounce) {
-            this._direction = 1;
-            frame = 1;
-          } else {
-            frame = this._frames.length - 1;
+      setTimeout(
+        () => {
+          if (this.paused) {
+            return;
           }
-        } else if (frame >= this._frames.length) {
-          if (this._bounce) {
-            this._direction = -1;
-            frame = this._frames.length - 2;
-          } else {
-            frame = 0;
+          var frame = this.frame + this._direction;
+          if (frame < 0) {
+            if (this._bounce) {
+              this._direction = 1;
+              frame = 1;
+            } else {
+              frame = this._frames.length - 1;
+            }
+          } else if (frame >= this._frames.length) {
+            if (this._bounce) {
+              this._direction = -1;
+              frame = this._frames.length - 2;
+            } else {
+              frame = 0;
+            }
           }
-        }
-        this.frame = frame;
-        this.playAnimation(this._frames, this._frame);
-      }, this._delays[frame] * (1 / this._speed));
+          this.frame = frame;
+          this.playAnimation(this._frames, this._frame);
+        },
+        this._delays[frame] * (1 / this._speed)
+      );
     }
 
     next() {
@@ -369,7 +432,13 @@ export default function() {
         requestAnimationFrame(() => {
           this._ctx.putImageData(this._frames[frame], 0, 0);
           this._rendered = frame;
-          this.dispatchEvent(new CustomEvent('gif-frame', { bubbles: true, composed: true, detail: frame }));
+          this.dispatchEvent(
+            new CustomEvent('gif-frame', {
+              bubbles: true,
+              composed: true,
+              detail: frame,
+            })
+          );
         });
       }
     }
@@ -378,9 +447,14 @@ export default function() {
       while (this._decoded < frame) {
         var curr = this._decoded + 1;
         var frameInfo = this._gif.frameInfo(curr);
-        var imageData = this._ctx.createImageData(this._gif.width, this._gif.height);
+        var imageData = this._ctx.createImageData(
+          this._gif.width,
+          this._gif.height
+        );
         if (curr > 0 && frameInfo.disposal < 2) {
-          imageData.data.set(new Uint8ClampedArray(this._frames[curr - 1].data));
+          imageData.data.set(
+            new Uint8ClampedArray(this._frames[curr - 1].data)
+          );
         }
         this._gif.decodeAndBlitFrameRGBA(curr, imageData.data);
         this._frames[curr] = imageData;
@@ -392,7 +466,10 @@ export default function() {
     // pre-emptively render remaining frames during any idle time
     // https://developers.google.com/web/updates/2015/08/using-requestidlecallback
     prerenderFrames(deadline) {
-      while (deadline.timeRemaining() > 0 && this._decoded < this._frames.length - 1) {
+      while (
+        deadline.timeRemaining() > 0 &&
+        this._decoded < this._frames.length - 1
+      ) {
         this.renderFrame(this._decoded + 1);
       }
 

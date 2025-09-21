@@ -36,7 +36,9 @@ import {
  *   });
  * ```
  */
-const rehypeGifControls = (userOptions: Partial<RehypeGifControlsOptions> = {}) => {
+const rehypeGifControls = (
+  userOptions: Partial<RehypeGifControlsOptions> = {}
+) => {
   const options = mergeOptions(userOptions);
   let hasFoundGifs = false;
 

@@ -36,16 +36,19 @@ const withMDX = require('@next/mdx')({
   extension: /\.mdx?$/,
   options: {
     rehypePlugins: [
-      ['@benjc/rehype-gif-controls', {
-        gifPlayer: {
-          delay: 500,
-          autoplay: true,
+      [
+        '@benjc/rehype-gif-controls',
+        {
+          gifPlayer: {
+            delay: 500,
+            autoplay: true,
+          },
+          security: {
+            allowedDomains: [], // Empty = allow all domains
+          },
+          // injectScript: true is the default - no need to specify
         },
-        security: {
-          allowedDomains: [], // Empty = allow all domains
-        },
-        // injectScript: true is the default - no need to specify
-      }],
+      ],
     ],
   },
 });
@@ -69,12 +72,15 @@ export default defineConfig({
   integrations: [
     mdx({
       rehypePlugins: [
-        [rehypeGifControls, {
-          gifPlayer: {
-            delay: 500,
-            autoplay: true,
+        [
+          rehypeGifControls,
+          {
+            gifPlayer: {
+              delay: 500,
+              autoplay: true,
+            },
           },
-        }],
+        ],
       ],
     }),
   ],
@@ -91,12 +97,15 @@ module.exports = {
       resolve: `gatsby-plugin-mdx`,
       options: {
         rehypePlugins: [
-          [require('@benjc/rehype-gif-controls'), {
-            gifPlayer: {
-              delay: 500,
-              autoplay: true,
+          [
+            require('@benjc/rehype-gif-controls'),
+            {
+              gifPlayer: {
+                delay: 500,
+                autoplay: true,
+              },
             },
-          }],
+          ],
         ],
       },
     },
@@ -135,12 +144,26 @@ Here are some test GIFs:
 Look for this structure in your browser dev tools:
 
 ```html
-<div class="gif-controls" data-gif-controls="true" data-gif-controls-delay="500" data-gif-controls-autoplay="true">
-  <gif-player src="animation.gif" class="gif-controls__player" repeat alt="Loading Animation">
+<div
+  class="gif-controls"
+  data-gif-controls="true"
+  data-gif-controls-delay="500"
+  data-gif-controls-autoplay="true"
+>
+  <gif-player
+    src="animation.gif"
+    class="gif-controls__player"
+    repeat
+    alt="Loading Animation"
+  >
   </gif-player>
 </div>
 
-<script type="module" data-gif-controls-script="true" src="./lib/client.js"></script>
+<script
+  type="module"
+  data-gif-controls-script="true"
+  src="./lib/client.js"
+></script>
 ```
 
 ## Development Workflow
@@ -219,31 +242,44 @@ declare module '@benjc/rehype-gif-controls' {
 ## Test Configuration Examples
 
 ### Minimal Setup
+
 ```javascript
-rehypeGifControls // Uses all defaults
+rehypeGifControls; // Uses all defaults
 ```
 
 ### Custom Delay
+
 ```javascript
-[rehypeGifControls, {
-  gifPlayer: { delay: 1000 }
-}]
+[
+  rehypeGifControls,
+  {
+    gifPlayer: { delay: 1000 },
+  },
+];
 ```
 
 ### Security-Focused
+
 ```javascript
-[rehypeGifControls, {
-  security: {
-    allowedDomains: ['yourdomain.com', 'trusted-cdn.com']
-  }
-}]
+[
+  rehypeGifControls,
+  {
+    security: {
+      allowedDomains: ['yourdomain.com', 'trusted-cdn.com'],
+    },
+  },
+];
 ```
 
 ### Manual Script Control
+
 ```javascript
-[rehypeGifControls, {
-  injectScript: false // Disable auto-injection, handle script manually
-}]
+[
+  rehypeGifControls,
+  {
+    injectScript: false, // Disable auto-injection, handle script manually
+  },
+];
 ```
 
 ## Cleaning Up

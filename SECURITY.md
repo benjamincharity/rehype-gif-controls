@@ -14,24 +14,28 @@
 Version 1.0.0 includes extensive security improvements designed to protect against common web vulnerabilities:
 
 #### **XSS Protection**
+
 - **Multi-layered sanitization**: Removes HTML tags, dangerous characters, and malicious patterns
 - **JavaScript protocol blocking**: Prevents `javascript:` URLs and event handlers
 - **HTML entity protection**: Blocks encoded attack vectors like `&lt;script&gt;`
 - **Data URI validation**: Safely handles data URIs while preventing HTML content injection
 
 #### **Secure Script Injection**
+
 - **No arbitrary URLs**: Only bundled scripts can be injected - no external script loading
 - **CSP-friendly**: Uses `type="module"` for modern Content Security Policy compatibility
 - **Duplicate prevention**: Ensures scripts are only injected once per page
 - **Integrity protection**: No external dependencies that could be compromised
 
 #### **Input Validation**
+
 - **File extension validation**: Uses safe string operations instead of regex (prevents ReDoS)
 - **Domain whitelist support**: Restrict GIF sources to trusted domains
 - **Attribute length limits**: Prevents memory exhaustion attacks
 - **Safe property access**: Uses `getAttribute()` to prevent DOM clobbering
 
 #### **Supply Chain Security**
+
 - **Self-contained**: No external dependencies that could be compromised
 - **Bundled components**: All GIF processing built-in, eliminating CDN risks
 - **Version pinning**: Dependencies are locked to specific, audited versions
@@ -40,19 +44,20 @@ Version 1.0.0 includes extensive security improvements designed to protect again
 
 ### Fixed Vulnerabilities (v1.0.0)
 
-| ID | Severity | Issue | Status |
-|----|----------|-------|--------|
-| VULN-001 | HIGH | Information disclosure through console logging | ✅ **FIXED** |
-| VULN-002 | HIGH | XSS via incomplete sanitization | ✅ **FIXED** |
-| VULN-003 | HIGH | Supply chain risk from unpinned dependencies | ✅ **FIXED** |
-| VULN-004 | MEDIUM | Unsafe TypeScript `any` types | ✅ **FIXED** |
-| VULN-005 | MEDIUM | ReDoS in URL parsing regex | ✅ **FIXED** |
-| VULN-006 | MEDIUM | DOM clobbering via dataset access | ✅ **FIXED** |
-| VULN-007 | MEDIUM | Arbitrary script injection | ✅ **SECURED** |
+| ID       | Severity | Issue                                          | Status         |
+| -------- | -------- | ---------------------------------------------- | -------------- |
+| VULN-001 | HIGH     | Information disclosure through console logging | ✅ **FIXED**   |
+| VULN-002 | HIGH     | XSS via incomplete sanitization                | ✅ **FIXED**   |
+| VULN-003 | HIGH     | Supply chain risk from unpinned dependencies   | ✅ **FIXED**   |
+| VULN-004 | MEDIUM   | Unsafe TypeScript `any` types                  | ✅ **FIXED**   |
+| VULN-005 | MEDIUM   | ReDoS in URL parsing regex                     | ✅ **FIXED**   |
+| VULN-006 | MEDIUM   | DOM clobbering via dataset access              | ✅ **FIXED**   |
+| VULN-007 | MEDIUM   | Arbitrary script injection                     | ✅ **SECURED** |
 
 ### Security Testing
 
 The package includes comprehensive security tests covering:
+
 - XSS attack vectors (HTML injection, JavaScript protocols, event handlers)
 - ReDoS protection with large input strings
 - File extension validation edge cases
@@ -68,6 +73,7 @@ The package includes comprehensive security tests covering:
 Send security reports to: **security@benjamincharity.com**
 
 Include:
+
 - Description of the vulnerability
 - Steps to reproduce the issue
 - Potential impact assessment
@@ -83,11 +89,13 @@ Include:
 ### Scope
 
 This security policy applies to:
+
 - The main `@benjc/rehype-gif-controls` package
 - Bundled client-side scripts
 - Processing of user-provided content (GIF URLs, alt text, etc.)
 
 **Out of scope**:
+
 - Issues in dependencies beyond our control
 - Vulnerabilities requiring physical access
 - Social engineering attacks
@@ -130,9 +138,11 @@ When accepting user-provided GIF URLs:
 function isValidGifUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
-    return parsed.protocol === 'https:' &&
-           parsed.hostname.endsWith('.trusted-domain.com') &&
-           url.toLowerCase().endsWith('.gif');
+    return (
+      parsed.protocol === 'https:' &&
+      parsed.hostname.endsWith('.trusted-domain.com') &&
+      url.toLowerCase().endsWith('.gif')
+    );
   } catch {
     return false;
   }
@@ -142,6 +152,7 @@ function isValidGifUrl(url: string): boolean {
 ### Monitoring
 
 Monitor your application for:
+
 - Failed GIF processing attempts (potential attacks)
 - Unusual patterns in alt text or URLs
 - Content Security Policy violations

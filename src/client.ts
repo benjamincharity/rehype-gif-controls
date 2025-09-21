@@ -20,9 +20,11 @@ export function initGifControls(): void {
     isInitialized = true;
   }
 
-  const gifElements = document.querySelectorAll('[data-gif-controls="true"]:not([data-initialized])');
+  const gifElements = document.querySelectorAll(
+    '[data-gif-controls="true"]:not([data-initialized])'
+  );
 
-  gifElements.forEach(function(wrapper: Element) {
+  gifElements.forEach(function (wrapper: Element) {
     const wrapperElement = wrapper as HTMLElement;
     const gifPlayerElement = wrapper.querySelector('gif-player') as any; // gif-player doesn't have TypeScript definitions
 
@@ -31,8 +33,12 @@ export function initGifControls(): void {
     }
     wrapper.setAttribute('data-initialized', 'true');
 
-    const delay = parseInt(wrapperElement.getAttribute('data-gif-controls-delay') || '0', 10);
-    const autoplay = wrapperElement.getAttribute('data-gif-controls-autoplay') === 'true';
+    const delay = parseInt(
+      wrapperElement.getAttribute('data-gif-controls-delay') || '0',
+      10
+    );
+    const autoplay =
+      wrapperElement.getAttribute('data-gif-controls-autoplay') === 'true';
 
     // Enable infinite loop
     gifPlayerElement.setAttribute('repeat', '');
@@ -43,19 +49,22 @@ export function initGifControls(): void {
 
     // Set up viewport detection for autoplay
     if (autoplay) {
-      const observer = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-          if (entry.isIntersecting && entry.target === wrapper) {
-            observer.unobserve(wrapper as Element);
+      const observer = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting && entry.target === wrapper) {
+              observer.unobserve(wrapper as Element);
 
-            if (delay > 0) {
-              setTimeout(() => startPlayback(), delay);
-            } else {
-              startPlayback();
+              if (delay > 0) {
+                setTimeout(() => startPlayback(), delay);
+              } else {
+                startPlayback();
+              }
             }
-          }
-        });
-      }, { threshold: 0.1 });
+          });
+        },
+        { threshold: 0.1 }
+      );
 
       observer.observe(wrapper as Element);
     } else {
