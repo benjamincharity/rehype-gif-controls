@@ -100,11 +100,28 @@
   },
   "xo": {
     "prettier": true,
+    "prettierOptions": {
+      "semi": true,
+      "singleQuote": true,
+      "tabWidth": 2,
+      "trailingComma": "es5",
+      "useTabs": false,
+      "bracketSpacing": true
+    },
     "ignores": [
       "src/gif-player/"
     ],
     "rules": {
-      "unicorn/prefer-node-protocol": "off"
-    }
+      "unicorn/prefer-node-protocol": "off",
+      "@typescript-eslint/prefer-nullish-coalescing": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+      "unicorn/no-array-for-each": "off",
+      "import/no-anonymous-default-export": "off",
+      "unicorn/prefer-top-level-await": "off",
+      "n/prefer-global/process": "off",
+      "no-await-in-loop": "off"
+    },
+    "space": 2
   }
 }

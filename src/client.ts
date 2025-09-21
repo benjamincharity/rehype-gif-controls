@@ -26,19 +26,19 @@ export function initGifControls(): void {
 
   gifElements.forEach(function (wrapper: Element) {
     const wrapperElement = wrapper as HTMLElement;
-    const gifPlayerElement = wrapper.querySelector('gif-player') as any; // gif-player doesn't have TypeScript definitions
+    const gifPlayerElement = wrapper.querySelector('gif-player'); // Gif-player doesn't have TypeScript definitions
 
     if (!gifPlayerElement) {
       return;
     }
-    wrapper.setAttribute('data-initialized', 'true');
 
-    const delay = parseInt(
-      wrapperElement.getAttribute('data-gif-controls-delay') || '0',
+    wrapper.dataset.initialized = 'true';
+
+    const delay = Number.parseInt(
+      wrapperElement.dataset.gifControlsDelay || '0',
       10
     );
-    const autoplay =
-      wrapperElement.getAttribute('data-gif-controls-autoplay') === 'true';
+    const autoplay = wrapperElement.dataset.gifControlsAutoplay === 'true';
 
     // Enable infinite loop
     gifPlayerElement.setAttribute('repeat', '');
@@ -51,22 +51,24 @@ export function initGifControls(): void {
     if (autoplay) {
       const observer = new IntersectionObserver(
         function (entries) {
-          entries.forEach(function (entry) {
+          for (const entry of entries) {
             if (entry.isIntersecting && entry.target === wrapper) {
-              observer.unobserve(wrapper as Element);
+              observer.unobserve(wrapper);
 
               if (delay > 0) {
-                setTimeout(() => startPlayback(), delay);
+                setTimeout(() => {
+                  startPlayback();
+                }, delay);
               } else {
                 startPlayback();
               }
             }
-          });
+          }
         },
         { threshold: 0.1 }
       );
 
-      observer.observe(wrapper as Element);
+      observer.observe(wrapper);
     } else {
       // If not autoplay, start immediately
       startPlayback();

@@ -51,10 +51,10 @@ async function testPlugin() {
     if (gifControlsCount === 2 && wrapperCount === 2) {
       console.log('\n🎉 All tests passed!');
       return true;
-    } else {
-      console.log('\n❌ Some tests failed!');
-      return false;
     }
+
+    console.log('\n❌ Some tests failed!');
+    return false;
   } catch (error) {
     console.error('❌ Plugin test failed:', error.message);
     console.error(error.stack);

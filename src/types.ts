@@ -3,7 +3,7 @@ import type { Element } from 'hast';
 /**
  * Configuration options for the built-in gif-player web component
  */
-export interface GifPlayerOptions {
+export type GifPlayerOptions = {
   /**
    * Delay before starting auto-play (in milliseconds)
    * @default 500
@@ -37,12 +37,12 @@ export interface GifPlayerOptions {
    * Custom CSS classes to add to the GIF element
    */
   gifClasses?: string[];
-}
+};
 
 /**
  * Main plugin configuration
  */
-export interface RehypeGifControlsOptions {
+export type RehypeGifControlsOptions = {
   /**
    * Gifplayer.js configuration options
    */
@@ -92,15 +92,15 @@ export interface RehypeGifControlsOptions {
      */
     sanitizeAttributes?: boolean;
   };
-}
+};
 
 /**
  * Internal type for processed GIF elements
  */
-export interface ProcessedGifElement {
+export type ProcessedGifElement = {
   element: Element;
   src: string;
   alt: string | undefined;
   width: string | undefined;
   height: string | undefined;
-}
+};

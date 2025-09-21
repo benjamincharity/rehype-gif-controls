@@ -140,7 +140,6 @@ interface RehypeGifControlsOptions {
 }
 ```
 
-
 ## BEM CSS Classes & Styling
 
 This package follows [BEM methodology](http://getbem.com/) for CSS class naming:
@@ -189,7 +188,6 @@ The gif-player web component handles responsive behavior automatically with thes
   max-width: 100%;
 }
 ```
-
 
 ## gif-player Web Component Features
 

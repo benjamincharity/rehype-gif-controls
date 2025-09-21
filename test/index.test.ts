@@ -5,7 +5,7 @@ import { describe, it, expect } from 'vitest';
 import rehypeGifControls from '../src/index.js';
 import type { RehypeGifControlsOptions } from '../src/types.js';
 
-const process = (html: string, options?: RehypeGifControlsOptions) => {
+const process = async (html: string, options?: RehypeGifControlsOptions) => {
   const defaultOptions = { injectScript: false, ...options }; // Default to false in tests for cleaner output
   return unified()
     .use(rehypeParse, { fragment: true })
@@ -116,7 +116,7 @@ describe('rehype-gif-controls', () => {
 
       expect(result).toContain('data-gif-controls-alt="Test alert(1) GIF"');
       // Check that script tags are removed from the sanitized alt text
-      const wrapper = result.match(/data-gif-controls-alt="[^"]*"/);
+      const wrapper = /data-gif-controls-alt="[^"]*"/.exec(result);
       expect(wrapper?.[0]).toContain('Test');
       expect(wrapper?.[0]).toContain('GIF');
       // The sanitization removes dangerous characters like < > ' "
@@ -177,10 +177,10 @@ describe('rehype-gif-controls', () => {
     it('should prevent ReDoS attacks in file extension parsing', async () => {
       // Test with potentially problematic URLs that could cause ReDoS
       const problematicUrls = [
-        '<img src="test' + 'a'.repeat(10000) + '.gif" alt="Test">',
-        '<img src="test.gif' + '?param=' + 'b'.repeat(10000) + '" alt="Test">',
+        '<img src="test' + 'a'.repeat(10_000) + '.gif" alt="Test">',
+        `<img src="test.gif?param=${'b'.repeat(10_000)}" alt="Test">`,
         '<img src="data:image/gif;base64,' +
-          'A'.repeat(10000) +
+          'A'.repeat(10_000) +
           '" alt="Test">',
       ];
 
@@ -242,6 +242,7 @@ describe('rehype-gif-controls', () => {
       expect(result).toContain('src="./lib/client.js"');
       expect(result).not.toContain('http://');
       expect(result).not.toContain('https://');
+      // eslint-disable-next-line no-script-url
       expect(result).not.toContain('javascript:');
     });
   });
@@ -355,8 +356,8 @@ describe('rehype-gif-controls', () => {
       const result = await process(input);
 
       // Should truncate to 500 characters
-      const altMatch = result.match(/data-gif-controls-alt="([^"]*)"/);
-      if (altMatch && altMatch[1]) {
+      const altMatch = /data-gif-controls-alt="([^"]*)"/.exec(result);
+      if (altMatch?.[1]) {
         expect(altMatch[1].length).toBeLessThanOrEqual(500);
       }
     });

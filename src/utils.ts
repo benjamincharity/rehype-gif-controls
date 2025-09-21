@@ -58,23 +58,25 @@ export function isGifImage(element: Element, extensions: string[]): boolean {
 /**
  * Extract file extension from URL or data URI
  */
-function extractFileExtension(src: string): string | null {
+function extractFileExtension(src: string): string | undefined {
   // Handle data URIs
   if (src.startsWith('data:')) {
     // Use simple string operations instead of regex to prevent ReDoS
     const mimeStart = src.indexOf('image/');
     if (mimeStart === -1) return null;
 
-    const mimeType = src.substring(mimeStart + 6);
+    const mimeType = src.slice(Math.max(0, mimeStart + 6));
     const semicolon = mimeType.indexOf(';');
     const comma = mimeType.indexOf(',');
 
     const end = Math.min(
-      semicolon > -1 ? semicolon : Infinity,
-      comma > -1 ? comma : Infinity
+      semicolon > -1 ? semicolon : Number.POSITIVE_INFINITY,
+      comma > -1 ? comma : Number.POSITIVE_INFINITY
     );
 
-    return end !== Infinity ? mimeType.substring(0, end) : null;
+    return end === Number.POSITIVE_INFINITY
+      ? null
+      : mimeType.slice(0, Math.max(0, end));
   }
 
   // Handle regular URLs using safe string operations
@@ -93,10 +95,10 @@ function extractFileExtension(src: string): string | null {
       return null;
     }
 
-    const extension = cleanUrl.substring(lastDot + 1).toLowerCase();
+    const extension = cleanUrl.slice(Math.max(0, lastDot + 1)).toLowerCase();
 
     // Validate extension is alphanumeric only (security check)
-    if (!/^[a-z0-9]+$/i.test(extension)) {
+    if (!/^[a-z\d]+$/i.test(extension)) {
       return null;
     }
 
@@ -131,6 +133,7 @@ export function setAttributeValue(
   if (!element.properties) {
     element.properties = {};
   }
+
   element.properties[name] = value;
 }
 
@@ -139,19 +142,19 @@ export function setAttributeValue(
  */
 export function sanitizeAttribute(value: string): string {
   // Remove all HTML tags and dangerous patterns
-  let sanitized = value
+  const sanitized = value
     // Remove HTML/XML tags
-    .replace(/<[^>]*>/g, '')
+    .replaceAll(/<[^>]*>/g, '')
     // Remove HTML entities that could become dangerous
-    .replace(/&[#\w]+;/g, '')
+    .replaceAll(/&[#\w]+;/g, '')
     // Remove javascript: protocol
-    .replace(/javascript:/gi, '')
+    .replaceAll(/javascript:/gi, '')
     // Remove data: URIs with HTML content
-    .replace(/data:text\/html[^,]*,/gi, '')
+    .replaceAll(/data:text\/html[^,]*,/gi, '')
     // Remove event handlers
-    .replace(/on\w+\s*=/gi, '')
+    .replaceAll(/on\w+\s*=/gi, '')
     // Remove dangerous characters
-    .replace(/[<>'\"\\]/g, '')
+    .replaceAll(/[<>'"\\]/g, '')
     .trim()
     .slice(0, 500);
 
@@ -241,6 +244,7 @@ export function createGifWrapper(
   if (gifElement.width) {
     setAttributeValue(wrapper, 'data-gif-controls-width', gifElement.width);
   }
+
   if (gifElement.height) {
     setAttributeValue(wrapper, 'data-gif-controls-height', gifElement.height);
   }
@@ -248,7 +252,8 @@ export function createGifWrapper(
   // Calculate and store aspect ratio if dimensions are available
   if (gifElement.width && gifElement.height) {
     const aspectRatio = (
-      (parseInt(gifElement.height) / parseInt(gifElement.width)) *
+      (Number.parseInt(gifElement.height, 10) /
+        Number.parseInt(gifElement.width, 10)) *
       100
     ).toFixed(2);
     setAttributeValue(wrapper, 'data-gif-controls-aspect-ratio', aspectRatio);
@@ -258,7 +263,7 @@ export function createGifWrapper(
   if (gifElement.alt && security.sanitizeAttributes) {
     const sanitizedAlt = sanitizeAttribute(gifElement.alt);
     setAttributeValue(wrapper, 'data-gif-controls-alt', sanitizedAlt);
-    gifPlayerElement.properties!['alt'] = sanitizedAlt;
+    gifPlayerElement.properties['alt'] = sanitizedAlt;
   }
 
   return wrapper;
@@ -319,6 +324,7 @@ export function injectClientScript(tree: any): void {
         if (!htmlElement.children) {
           htmlElement.children = [];
         }
+
         htmlElement.children.unshift(headElement);
       }
 
@@ -337,12 +343,13 @@ export function injectClientScript(tree: any): void {
       if (!headElement.children) {
         headElement.children = [];
       }
+
       headElement.children.push(scriptElement);
       return;
     }
 
     // Fallback: Look for head or body element at root level
-    let targetElement = tree.children?.find(
+    const targetElement = tree.children?.find(
       (child: any) => child.tagName === 'head' || child.tagName === 'body'
     );
 
@@ -362,6 +369,7 @@ export function injectClientScript(tree: any): void {
       if (!tree.children) {
         tree.children = [];
       }
+
       tree.children.push(scriptElement);
       return;
     }
@@ -381,6 +389,7 @@ export function injectClientScript(tree: any): void {
     if (!targetElement.children) {
       targetElement.children = [];
     }
+
     targetElement.children.push(scriptElement);
   }
 }
